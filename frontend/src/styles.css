@@ -1,80 +1,173 @@
-body {
+/* Main Layout */
+.main-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at bottom, #d3d3d3 0%, #ffffff 60%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Courier New', Courier, monospace; /* Change to your exact font */
+}
+
+/* Rotating Background Circle */
+.circle-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  /* Centers the absolute element */
+  transform: translate(-50%, -50%); 
+  animation: spin 40s linear infinite;
+  z-index: 1;
+}
+
+.circle-container.slow { animation-duration: 60s; }
+.circle-container.fast { animation-duration: 20s; }
+
+/* The wrapper handles the positioning, the child counter-spins */
+.hand-icon-wrapper {
+  position: absolute;
+  top: -40px; /* Half of icon height */
+  left: -40px; /* Half of icon width */
+}
+
+.hand-icon-wrapper > div {
+  animation: counter-spin 40s linear infinite;
+}
+
+.circle-container.slow .hand-icon-wrapper > div { animation-duration: 60s; }
+.circle-container.fast .hand-icon-wrapper > div { animation-duration: 20s; }
+
+@keyframes spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes counter-spin {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+/* Placeholder for your actual images */
+.hand-icon-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: #ccc;
+  border: 3px solid #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Typography */
+.title-container {
+  text-align: center;
+  z-index: 2;
+}
+
+.title-container h1 {
+  font-size: 3rem;
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  background: #0b1020;
-  color: #e8eefc;
+  line-height: 1.1;
+  letter-spacing: 2px;
 }
 
-
-.app {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px;
+.title-container h2 {
+  font-size: 1.5rem;
+  font-weight: normal;
+  margin-top: 10px;
 }
 
-h1 {
-  margin: 0 0 8px;
-  font-size: 30px;
+/* Bottom Buttons */
+.nav-buttons {
+  position: absolute;
+  bottom: 10%;
+  display: flex;
+  gap: 20px;
+  z-index: 2;
 }
 
-.subtitle {
-  margin: 0 0 18px;
-  opacity: 0.85;
-}
-
-.board {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.gesture {
-  padding: 12px 10px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.06);
-  color: #e8eefc;
+.btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
   cursor: pointer;
-  font-weight: 600;
-  transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  transition: transform 0.1s;
 }
 
-.gesture:hover {
-  background: rgba(255, 255, 255, 0.11);
-  border-color: rgba(255, 255, 255, 0.22);
+.btn:active { transform: scale(0.95); }
+
+.btn-settings { background-color: #666; }
+.btn-play { background-color: #d9534f; font-weight: bold; padding: 12px 40px; }
+.btn-practice { background-color: #5a5a8a; }
+
+/* Settings Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
 }
 
-.gesture.selected {
-  border-color: rgba(0, 220, 255, 0.9);
-  box-shadow: 0 0 0 2px rgba(0, 220, 255, 0.25);
+.modal-content {
+  background: #e0e0e0;
+  padding: 30px;
+  border-radius: 20px;
+  width: 400px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
-.gesture:disabled {
-  cursor: not-allowed;
-  opacity: 0.75;
+.modal-content h3 {
+  margin-top: 0;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
 }
 
-.result {
-  margin-top: 22px;
-  padding: 16px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+.setting-group {
+  margin-bottom: 20px;
 }
 
-.line {
-  margin: 6px 0;
+.setting-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1rem;
 }
 
-.message {
-  margin-top: 10px;
-  font-size: 16px;
-  color: #d9ffe8;
+.toggle-group {
+  display: flex;
+  gap: 10px;
 }
 
-.error {
-  margin-top: 10px;
-  color: #ffd0d0;
+.toggle-group button {
+  flex: 1;
+  padding: 8px;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background: #ccc;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
 }
 
+/* Active states for toggle buttons */
+.toggle-group button.active.green { background: #5cb85c; color: white; border-color: #4cae4c; }
+.toggle-group button.active.yellow { background: #c0ca33; color: white; border-color: #afb42b; }
+.toggle-group button.active.red { background: #d9534f; color: white; border-color: #c9302c; }
+
+.btn-save {
+  width: 100%;
+  background: #444;
+  margin-top: 15px;
+}
