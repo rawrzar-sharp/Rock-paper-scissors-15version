@@ -1,0 +1,80 @@
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #0b1020;
+  color: #e8eefc;
+}
+
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+
+.subtitle {
+  margin: 0 0 18px;
+  opacity: 0.85;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.gesture {
+  padding: 12px 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8eefc;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.05s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.gesture:hover {
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.gesture.selected {
+  border-color: rgba(0, 220, 255, 0.9);
+  box-shadow: 0 0 0 2px rgba(0, 220, 255, 0.25);
+}
+
+.gesture:disabled {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.result {
+  margin-top: 22px;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.line {
+  margin: 6px 0;
+}
+
+.message {
+  margin-top: 10px;
+  font-size: 16px;
+  color: #d9ffe8;
+}
+
+.error {
+  margin-top: 10px;
+  color: #ffd0d0;
+}
+
