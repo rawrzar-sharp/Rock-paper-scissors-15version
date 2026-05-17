@@ -1,0 +1,82 @@
+/* Modals Core Shell Overrides */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal-overlay.backend-blur {
+  backdrop-filter: blur(6px);
+}
+
+.modal-content {
+  background: #0f1c3f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+  padding: 30px;
+  border-radius: 20px;
+  width: 400px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+}
+
+/* Settings Boilerplate Helpers */
+.setting-group {
+  margin-bottom: 20px;
+}
+
+.setting-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #cbd5e0;
+}
+
+.toggle-group {
+  display: flex;
+  gap: 10px;
+}
+
+.toggle-group button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  background: #2d3748;
+  color: #a0aec0;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.toggle-group button.active.green {
+  background: #38a169;
+  color: white;
+}
+
+.toggle-group button.active.yellow {
+  background: #ecc94b;
+  color: #1a202c;
+}
+
+.toggle-group button.active.red {
+  background: #e53e3e;
+  color: white;
+}
+
+.btn-save {
+  width: 100%;
+  background: #4a5568;
+  margin-top: 15px;
+}
+
+.btn-save:hover {
+  background: #718096;
+}
+

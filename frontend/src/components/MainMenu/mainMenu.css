@@ -1,0 +1,76 @@
+/* Typography Home Screens */
+.title-container {
+  text-align: center;
+  z-index: 2;
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+}
+
+.title-container h1 {
+  font-size: 3.6rem;
+  margin: 0;
+  line-height: 1.1;
+  letter-spacing: 4px;
+  font-weight: 900;
+}
+
+.title-container h2 {
+  font-size: 1.8rem;
+  margin-top: 10px;
+  color: #7f9cf5;
+}
+
+/* Buttons Mechanics */
+.nav-buttons {
+  position: absolute;
+  bottom: 10%;
+  display: flex;
+  gap: 20px;
+  z-index: 2;
+}
+
+.btn {
+  padding: 14px 28px;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.2s ease;
+  font-weight: bold;
+  font-family: inherit;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn-settings {
+  background: #4a5568;
+}
+
+.btn-settings:hover {
+  background: #718096;
+  box-shadow: 0 0 12px rgba(113, 128, 150, 0.5);
+}
+
+.btn-play {
+  background: #e53e3e;
+  padding: 14px 55px;
+  font-size: 1.3rem;
+}
+
+.btn-play:hover {
+  background: #fc8181;
+  box-shadow: 0 0 20px rgba(229, 62, 62, 0.6);
+}
+
+.btn-practice {
+  background: #4c51bf;
+}
+
+.btn-practice:hover {
+  background: #667eea;
+  box-shadow: 0 0 12px rgba(76, 81, 191, 0.5);
+}
+

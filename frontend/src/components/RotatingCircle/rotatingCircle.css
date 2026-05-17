@@ -1,22 +1,4 @@
-/* Global/shared styles.
-   Component-specific styling lives in each component's CSS file under /components.
-*/
-
-.main-container {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  background: radial-gradient(circle at bottom, #001a4d 0%, #000b1f 75%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  font-family: inherit;
-  color: #ffffff;
-}
-
-/* Shared circle + animation primitives used by multiple views */
+/* Shared Rotating Ring Settings */
 .circle-container {
   position: absolute;
   top: 50%;
@@ -27,13 +9,16 @@
   animation: spin 40s linear infinite;
   z-index: 1;
 }
+
 .circle-container.slow {
   animation-duration: 60s;
 }
+
 .circle-container.fast {
   animation-duration: 20s;
 }
 
+/* Mini Ring Overrides for Setup/Rules contexts */
 .circle-container.mini-ring {
   position: relative;
   top: 0;
@@ -68,18 +53,21 @@
   }
 }
 
-/* Hand elements & geometry correction */
+/* Hand Elements & Geometry Correction */
 .hand-icon-wrapper {
   position: absolute;
   top: -42px;
   left: -42px;
 }
+
 .hand-icon-wrapper > .hand-icon {
   animation: counter-spin 40s linear infinite;
 }
+
 .circle-container.slow .hand-icon-wrapper > .hand-icon {
   animation-duration: 60s;
 }
+
 .circle-container.fast .hand-icon-wrapper > .hand-icon {
   animation-duration: 20s;
 }
@@ -118,36 +106,5 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
   background: rgba(255, 255, 255, 0.06);
   display: block;
-}
-
-/* Shared animation utilities */
-.fade-in {
-  animation: fadeInAnimation 0.35s ease forwards;
-}
-
-@keyframes fadeInAnimation {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.grid-pop {
-  animation: gridPopAnimation 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
-@keyframes gridPopAnimation {
-  from {
-    opacity: 0;
-    transform: scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
 }
 
