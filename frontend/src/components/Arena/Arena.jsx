@@ -10,7 +10,7 @@ const Arena = ({
   powerupsEnabled,
   activePowerup,
   onExitToMenu,
-  animSpeed, // Kept in props in case you route it to other child components later
+  animSpeed, 
 }) => {
   const GESTURES = useMemo(() => [
     { name: 'Rock', color: '#ecc94b' },
@@ -36,10 +36,11 @@ const Arena = ({
   const [clashAnnouncement, setClashAnnouncement] = useState('CONNECTING TO BATTLE ENGINE...');
   const [errorMsg, setErrorMsg] = useState('');
   
-  // State for streaming historical RabbitMQ action events down in the logging console
+  // NEW: Track whether this specific client has submitted their selection
+  const [isMoveLocked, setIsMoveLocked] = useState(false);
+  
   const [actionLogs, setActionLogs] = useState([]);
 
-  // Helper to safely append logs with unique React IDs to prevent rendering bugs
   const pushLog = (text) => {
     setActionLogs((prev) => [{ id: `${Date.now()}-${Math.random()}`, text }, ...prev]);
   };
@@ -57,40 +58,47 @@ const Arena = ({
     };
 
     ws.onmessage = (event) => {
-      const payload = JSON.parse(event.data);
+  try {
+    const payload = JSON.parse(event.data);
+    console.log("WebSocket payload received:", payload); // Crucial for debugging!
+    
+    // Fallback: Use payload.state if nested, otherwise treat the whole payload as the state
+    const incomingState = payload.state ? payload.state : (payload.health ? payload : null);
+    
+    if (incomingState) {
+      setGameState(incomingState);
+    }
+
+    if (payload.log) {
+      pushLog(payload.log);
+    }
+
+    if (payload.clash) {
+      setIsMoveLocked(false);
+      const isMeX = playerMarker === 'X';
+      let customLog = "";
+
+      if (payload.clash.outcome === 'X_win') {
+        const banner = isMeX ? "HIT! You beat your opponent!" : "MISS! Opponent struck through your defense!";
+        setClashAnnouncement(banner);
+        customLog = `USER X attacks USER O and HIT, USER O DOWN Health`;
+      } else if (payload.clash.outcome === 'O_win') {
+        const banner = isMeX ? "MISS! Opponent countered your strike!" : "HIT! You countered your opponent!";
+        setClashAnnouncement(banner);
+        customLog = `USER O attacks USER X and HIT, USER X DOWN Health`;
+      } else {
+        setClashAnnouncement('SYMMETRICAL TIE! Systems locked.');
+        customLog = `USER X and USER O tied their gesture sequence battle.`;
+      }
       
-      if (payload.state) {
-        setGameState(payload.state);
+      if (!payload.log) {
+        pushLog(customLog);
       }
-
-      // Check if there is an explicit RabbitMQ style log message or event breakdown payload
-      if (payload.log) {
-        pushLog(payload.log);
-      }
-
-      if (payload.clash) {
-        const isMeX = playerMarker === 'X';
-        let customLog = "";
-
-        if (payload.clash.outcome === 'X_win') {
-          const banner = isMeX ? "HIT! You beat your opponent!" : "MISS! Opponent struck through your defense!";
-          setClashAnnouncement(banner);
-          customLog = `USER X attacks USER O and HIT, USER O DOWN Health`;
-        } else if (payload.clash.outcome === 'O_win') {
-          const banner = isMeX ? "MISS! Opponent countered your strike!" : "HIT! You countered your opponent!";
-          setClashAnnouncement(banner);
-          customLog = `USER O attacks USER X and HIT, USER X DOWN Health`;
-        } else {
-          setClashAnnouncement('SYMMETRICAL TIE! Systems locked.');
-          customLog = `USER X and USER O tied their gesture sequence battle.`;
-        }
-        
-        // Fallback live logger if backend doesn't broadcast custom log frames directly
-        if (!payload.log) {
-          pushLog(customLog);
-        }
-      }
-    };
+    }
+  } catch (err) {
+    console.error("Failed to parse incoming WebSocket message:", err);
+  }
+};
 
     ws.onerror = () => {
       setErrorMsg('WebSocket connection encountered a critical failure.');
@@ -101,7 +109,15 @@ const Arena = ({
     };
 
     return () => {
-      ws.close();
+      if (ws) {
+        ws.onopen = null;
+        ws.onclose = null;
+        ws.onerror = null;
+        ws.onmessage = null;
+        if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+          ws.close();
+        }
+      }
     };
   }, [sessionId, playerMarker]);
 
@@ -115,7 +131,8 @@ const Arena = ({
   }, [gameState, powerupsEnabled, playerMarker, activePowerup]);
 
   const handleSelectGesture = (gestureName) => {
-    if (!gameState || gameState.is_paused || gameState.game_over) return;
+    // Prevent changing selections if already submitted
+    if (!gameState || gameState.is_paused || gameState.game_over || isMoveLocked) return;
 
     setSelectedGestures((prev) => {
       if (prev.includes(gestureName)) {
@@ -143,13 +160,16 @@ const Arena = ({
       use_powerup: usesPowerup,
     };
 
-    // Pre-log powerup actions dynamically if triggered
     if (usesPowerup) {
       pushLog(`USER ${playerMarker === 'X' ? '1' : '2'} uses POWER UP, DOUBLE SELECTION TRIGGERED`);
     }
 
     socket.send(JSON.stringify(movePayload));
     setSelectedGestures([]);
+    
+    // FEEDBACK: Update local UI status immediately
+    setIsMoveLocked(true);
+    setClashAnnouncement('MOVE TRANSMITTED. WAITING FOR RIVAL CONFIRMATION...');
   };
 
   const handleTogglePause = () => {
@@ -174,11 +194,8 @@ const Arena = ({
 
   return (
     <div style={{ backgroundColor: '#fff', minHeight: '100vh', width: '100%', padding: '20px 0', boxSizing: 'border-box', color: '#000', fontFamily: '"Courier New", Courier, monospace' }}>
-      
-      {/* Centered Main Layout Grid Box */}
       <div style={{ maxWidth: '1200px', margin: '0 auto', border: '2px solid #000', padding: '15px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
         
-        {/* Back navigation button */}
         <button 
           onClick={handleForfeit}
           style={{ position: 'absolute', top: '15px', left: '15px', background: '#e2e8f0', border: '1px solid #000', padding: '10px 15px', fontSize: '18px', cursor: 'pointer', fontWeight: 'bold', zIndex: 20 }}
@@ -186,7 +203,6 @@ const Arena = ({
           &lt;
         </button>
 
-        {/* Top Header Controls / Utility Bar */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginBottom: '10px' }}>
           <button onClick={handleTogglePause} style={{ padding: '5px 12px', border: '1px solid #000', background: '#fff', cursor: 'pointer', fontWeight: 'bold' }}>
             {gameState.is_paused ? '▶ RESUME' : '⏸ PAUSE'}
@@ -196,13 +212,11 @@ const Arena = ({
           </button>
         </div>
 
-        {/* Arena Workspace Split: Left Combat Arena vs Right Rival Sidebar */}
         <div style={{ display: 'flex', borderTop: '2px solid #000', minHeight: '520px' }}>
           
-          {/* LEFT SIDE: MAIN PLAYER RING AREA */}
+          {/* LEFT SIDE: PLAYER RING AREA */}
           <div style={{ flex: '2', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between', borderRight: '2px solid #000', position: 'relative', overflow: 'hidden' }}>
             
-            {/* Self Health status header tracking */}
             <div style={{ width: '100%', textAlign: 'center', marginBottom: '10px', position: 'relative', zIndex: 10 }}>
               <div style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '4px' }}>Health Bar ({gameState.players?.[playerMarker] || 'You'})</div>
               <div style={{ width: '100%', height: '14px', background: '#edf2f7', border: '1px solid #000', borderRadius: '4px', overflow: 'hidden' }}>
@@ -210,10 +224,7 @@ const Arena = ({
               </div>
             </div>
 
-            {/* Main Circle Component Wrapper */}
             <div style={{ position: 'relative', width: '380px', height: '380px', margin: '20px 0', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              
-              {/* Dynamic Absolute Coordinates Ring Layout */}
               {GESTURES.map((g, index) => {
                 const angle = (index * 2 * Math.PI) / GESTURES.length - Math.PI / 2;
                 const radius = 160;
@@ -224,12 +235,13 @@ const Arena = ({
                 return (
                   <button
                     key={g.name}
+                    disabled={isMoveLocked}
                     onClick={() => handleSelectGesture(g.name)}
                     style={{
                       position: 'absolute',
                       top: '50%',
                       left: '50%',
-                      margin: '-25px 0 0 -25px', // Perfectly centers the 50x50 button over its coordinate
+                      margin: '-25px 0 0 -25px', 
                       transform: `translate(${x}px, ${y}px)`,
                       width: '50px',
                       height: '50px',
@@ -237,7 +249,8 @@ const Arena = ({
                       background: g.color,
                       border: isSelected ? '4px solid #000' : '2px solid #4a5568',
                       boxShadow: isSelected ? '0 0 12px rgba(0,0,0,0.6)' : 'none',
-                      cursor: 'pointer',
+                      cursor: isMoveLocked ? 'not-allowed' : 'pointer',
+                      opacity: isMoveLocked ? 0.6 : 1,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -253,13 +266,11 @@ const Arena = ({
                 );
               })}
 
-              {/* Circle Center Display Console */}
               <div style={{ textAlign: 'center', zIndex: 2 }}>
                 <h2 style={{ fontSize: '28px', margin: '0 0 5px 0', letterSpacing: '1px' }}>
-                  {maxChoices > 1 ? "Choose two" : "Choose one"}
+                  {isMoveLocked ? "Locked" : maxChoices > 1 ? "Choose two" : "Choose one"}
                 </h2>
                 
-                {/* Active Match Power-up Selection Badges */}
                 <div style={{ marginTop: '10px' }}>
                   <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#718096', marginBottom: '4px' }}>Power up</div>
                   <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
@@ -271,16 +282,23 @@ const Arena = ({
               </div>
             </div>
 
-            {/* Bottom Form Action Buttons */}
             <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px', position: 'relative', zIndex: 10 }}>
-              <div style={{ fontSize: '13px', fontStyle: 'italic', color: '#4a5568' }}>{clashAnnouncement}</div>
+              <div style={{ fontSize: '13px', fontStyle: 'italic', color: '#4a5568', textAlign: 'center' }}>{clashAnnouncement}</div>
               {!gameState.game_over ? (
                 <button
-                  disabled={selectedGestures.length === 0}
+                  disabled={selectedGestures.length === 0 || isMoveLocked}
                   onClick={handleLockMove}
-                  style={{ padding: '8px 24px', background: selectedGestures.length === 0 ? '#cbd5e0' : '#000', color: selectedGestures.length === 0 ? '#718096' : '#fff', border: 'none', fontWeight: 'bold', cursor: selectedGestures.length === 0 ? 'not-allowed' : 'pointer', width: '200px' }}
+                  style={{ 
+                    padding: '8px 24px', 
+                    background: (selectedGestures.length === 0 || isMoveLocked) ? '#cbd5e0' : '#000', 
+                    color: (selectedGestures.length === 0 || isMoveLocked) ? '#718096' : '#fff', 
+                    border: 'none', 
+                    fontWeight: 'bold', 
+                    cursor: (selectedGestures.length === 0 || isMoveLocked) ? 'not-allowed' : 'pointer', 
+                    width: '200px' 
+                  }}
                 >
-                  CONFIRM ({selectedGestures.length})
+                  {isMoveLocked ? 'SUBMITTED' : `CONFIRM (${selectedGestures.length})`}
                 </button>
               ) : (
                 <div style={{ textAlign: 'center', border: '1px dashed #000', padding: '10px', width: '100%' }}>
@@ -299,24 +317,21 @@ const Arena = ({
           {/* RIGHT SIDE: RIVAL SIDEBAR LAYOUT */}
           <div style={{ flex: '1', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', overflow: 'hidden' }}>
             
-            {/* Opponent Profile Identity card header */}
             <div style={{ textAlign: 'right', position: 'relative', zIndex: 10 }}>
               <span style={{ fontSize: '12px', color: '#718096', display: 'block' }}>RIVAL OPPONENT</span>
               <h2 style={{ fontSize: '26px', margin: '0 0 10px 0', textTransform: 'uppercase', letterSpacing: '1px' }}>
                 {gameState.players?.[opponentMarker] || 'Rival'} ({opponentMarker})
               </h2>
               
-              {/* Rival Health Bar */}
               <div style={{ width: '100%', height: '14px', background: '#edf2f7', border: '1px solid #000', borderRadius: '4px', overflow: 'hidden', marginBottom: '10px' }}>
                 <div style={{ width: `${Math.max(0, gameState.health?.[opponentMarker] || 0)}%`, height: '100%', background: '#800000', float: 'right', transition: 'width 0.3s ease' }}></div>
               </div>
               <span style={{ fontSize: '12px', fontWeight: 'bold' }}>{gameState.points?.[opponentMarker] || 0} PTS</span>
             </div>
 
-            {/* Partial Right Arch decorative circle matching layout image context */}
             <div style={{ position: 'absolute', right: '-100px', top: '50%', transform: 'translateY(-50%)', width: '240px', height: '240px', border: '1px dashed #cbd5e0', borderRadius: '50%', pointerEvents: 'none', zIndex: 1 }}>
               {GESTURES.slice(0, 7).map((g, index) => {
-                const angle = (index * Math.PI) / 6 - Math.PI / 2; // Semi-circle spread
+                const angle = (index * Math.PI) / 6 - Math.PI / 2; 
                 const radius = 120;
                 const x = Math.round(radius * Math.cos(angle));
                 const y = Math.round(radius * Math.sin(angle));
@@ -341,12 +356,13 @@ const Arena = ({
               })}
             </div>
 
-            {/* Dynamic Status / Action triggers */}
             <div style={{ textAlign: 'center', marginBottom: '30px', zIndex: 10, position: 'relative' }}>
               <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#e53e3e', display: 'block' }}>
-                Ready!
+                {isMoveLocked ? "Evaluating..." : "Ready!"}
               </span>
-              <span style={{ fontSize: '11px', color: '#718096' }}>Waiting for system lock confirmation...</span>
+              <span style={{ fontSize: '11px', color: '#718096' }}>
+                {isMoveLocked ? "Waiting for other match updates..." : "Waiting for system lock confirmation..."}
+              </span>
             </div>
 
           </div>

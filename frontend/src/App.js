@@ -11,7 +11,7 @@ const App = () => {
   const [currentView, setCurrentView] = useState('MAIN_MENU');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
-
+  
   // 1. Initialize variables inside the component scope
   const queryParams = new URLSearchParams(window.location.search);
   const dynamicSessionId = queryParams.get('room') || 'session_1';
@@ -77,6 +77,7 @@ const App = () => {
           onClose={() => setIsSettingsOpen(false)}
         />
       )}
+
 
       {isRulesOpen && <RulesModal onClose={() => setIsRulesOpen(false)} />}
     </>

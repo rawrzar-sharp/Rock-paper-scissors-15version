@@ -1,7 +1,7 @@
 # Project-3-Game (Distributed Tic-Tac-Toe - Scaffold)
 
 This repo is being built per the project overview:
-React + Python (Flask/Django) + Redis + RabbitMQ + WebSockets + Docker.
+React + Python + Flask + Redis + RabbitMQ + WebSockets + Docker.
 
 ## Run backend + redis + rabbitmq (scaffold)
 
@@ -17,3 +17,4 @@ Backend API:
 
 Next steps: add React frontend + WebSocket real-time updates + a RabbitMQ consumer worker.
 
+Rechecked all components and changes ws multiple times.
