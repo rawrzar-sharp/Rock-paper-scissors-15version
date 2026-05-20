@@ -151,3 +151,313 @@
   }
 }
 
+/* --- HIGH POLISH LIVE ARENA VIEW STYLING --- */
+.arena-workspace {
+  position: relative;
+  width: 92%;
+  max-width: 1280px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 0;
+  z-index: 5;
+}
+
+/* Heads Up Display Header Row Layout */
+.arena-hud-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 20px;
+}
+
+.player-hud-card {
+  flex: 1;
+  background: rgba(11, 19, 43, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 15px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.alignment-left {
+  border-left: 4px solid #3182ce;
+}
+.alignment-right {
+  border-right: 4px solid #e53e3e;
+}
+
+.hud-identity-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.hud-identity-row-reverse {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.hud-username {
+  font-weight: bold;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  color: #fff;
+}
+.hud-score-badge {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: #cbd5e0;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Twin Health Bar Layout Foundations */
+.health-bar-container {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  background: #1a202c;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.background-flipped {
+  transform: scaleX(1);
+}
+.health-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  height: 100%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.user-fill {
+  background: linear-gradient(90deg, #2b6cb0 0%, #3182ce 100%);
+  box-shadow: 0 0 10px rgba(49, 130, 206, 0.5);
+}
+.rival-fill {
+  background: linear-gradient(90deg, #e53e3e 0%, #c53030 100%);
+  box-shadow: 0 0 10px rgba(229, 62, 62, 0.5);
+}
+.health-percentage-text {
+  position: relative;
+  z-index: 3;
+  font-size: 0.85rem;
+  font-weight: bold;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+.hud-powerup-indicator {
+  font-size: 0.78rem;
+  margin-top: 8px;
+  letter-spacing: 0.5px;
+}
+.hud-powerup-indicator.active-primed {
+  color: #68d391;
+}
+.hud-powerup-indicator.depleted {
+  color: #718096;
+  text-decoration: line-through;
+}
+
+/* In-Match System Utility Controls Row */
+.hud-center-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.arena-hud-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-pause-trigger {
+  background: #2d3748;
+}
+.btn-pause-trigger:hover {
+  background: #4a5568;
+}
+.btn-quit-trigger {
+  background: rgba(229, 62, 62, 0.2);
+  border-color: rgba(229, 62, 62, 0.4);
+}
+.btn-quit-trigger:hover {
+  background: rgba(229, 62, 62, 0.4);
+}
+
+/* Combat Theater Layout Canvas Box */
+.arena-combat-theater {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  position: relative;
+  transition: filter 0.3s ease;
+}
+.blur-active-theater {
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.combat-ring-wrapper {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(15, 23, 42, 0.6) 0%, rgba(0, 0, 0, 0) 70%);
+}
+
+.combat-center-hud-announcer {
+  position: absolute;
+  text-align: center;
+  z-index: 4;
+  pointer-events: none;
+}
+.announcer-inner-title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #fff;
+  text-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+}
+.announcer-pool-value {
+  font-size: 0.75rem;
+  color: #a0aec0;
+  margin-top: 4px;
+}
+
+/* Control Submission Footer Bar Styles */
+.theater-interaction-footer {
+  width: 100%;
+  max-width: 650px;
+  text-align: center;
+  margin-top: 15px;
+  z-index: 10;
+}
+.announcement-banner {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  color: #e2e8f0;
+  margin-bottom: 15px;
+  text-shadow: 0 1px 2px #000;
+}
+
+.btn-lock-submission {
+  background: linear-gradient(135deg, #3182ce 0%, #2b6cb0 100%);
+  width: 100%;
+  padding: 15px;
+  font-size: 1.15rem;
+  letter-spacing: 1px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: white;
+  cursor: pointer;
+}
+.btn-lock-submission:hover:not(:disabled) {
+  box-shadow: 0 0 15px rgba(49, 130, 206, 0.5);
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+}
+.btn-lock-submission:disabled {
+  background: #2d3748;
+  color: #718096;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Post-Game Victory Screen Elements */
+.match-resolution-frame {
+  background: rgba(16, 26, 63, 0.9);
+  border: 2px solid #ecc94b;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 0 25px rgba(236, 201, 75, 0.2);
+}
+.victory-announcement {
+  font-size: 1.6rem;
+  margin-top: 0;
+  margin-bottom: 15px;
+  color: #fff;
+  letter-spacing: 1px;
+}
+.btn-return-home {
+  background: #4a5568;
+  width: 200px;
+  border-radius: 10px;
+  padding: 12px;
+  color: white;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.btn-return-home:hover {
+  background: #718096;
+}
+
+/* Sync Pause Sub-overlay Shell Window */
+.arena-internal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+.pause-dialog-box {
+  background: #0f1c3f;
+  border: 2px solid #4a5568;
+  border-radius: 20px;
+  padding: 30px;
+  width: 440px;
+  text-align: center;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+}
+.pause-dialog-box h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  color: #fc8181;
+  letter-spacing: 1px;
+}
+.divider-line {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 20px 0;
+}
+.pause-actions-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Quit Warning Node Adjuster */
+.warning-modal {
+  border: 1px solid #e53e3e !important;
+  box-shadow: 0 15px 40px rgba(229, 62, 62, 0.2) !important;
+}
+

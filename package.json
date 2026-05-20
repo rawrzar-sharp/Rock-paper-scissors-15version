@@ -1,6 +1,10 @@
 {
   "dependencies": {
+    "eslint": "^10.4.0",
     "pika": "^0.0.1-security",
     "redis": "^5.12.1"
+  },
+  "devDependencies": {
+    "eslint-plugin-react-hooks": "^7.1.1"
   }
 }

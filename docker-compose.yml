@@ -9,6 +9,11 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
 
   backend:
     build:
@@ -20,8 +25,10 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - redis
-      - rabbitmq
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy 
 
   frontend:
     build:
@@ -31,6 +38,5 @@ services:
     ports:
       - "3000:3000"
     depends_on:
-      - backend
-
-
+      backend:
+        condition: service_started

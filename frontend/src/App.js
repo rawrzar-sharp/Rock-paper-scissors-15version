@@ -3,6 +3,7 @@ import MainMenu from './components/MainMenu/MainMenu';
 import RoundMenu from './components/RoundMenu/RoundMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import RulesModal from './components/RulesModal/RulesModal';
+import Arena from './components/Arena/Arena';
 
 import './styles.css';
 
@@ -11,18 +12,20 @@ const App = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
 
-  // Settings States
+  // 1. Initialize variables inside the component scope
+  const queryParams = new URLSearchParams(window.location.search);
+  const dynamicSessionId = queryParams.get('room') || 'session_1';
+  const assignedMarker = queryParams.get('player') || 'X';
+
   const [difficulty, setDifficulty] = useState('Easy');
   const [animSpeed, setAnimSpeed] = useState('Neutral');
   const [volume, setVolume] = useState('Neutral');
-
-  // Round Menu States
   const [roundCount, setRoundCount] = useState(5);
   const [powerupsEnabled, setPowerupsEnabled] = useState(true);
   const [activePowerup, setActivePowerup] = useState('Double Selection');
 
   const onEnterArena = () => {
-    alert('Launching Arena...');
+    setCurrentView('ARENA');
   };
 
   return (
@@ -50,6 +53,19 @@ const App = () => {
         />
       )}
 
+      {/* 2. Pass the defined variables as props */}
+      {currentView === 'ARENA' && (
+        <Arena
+          sessionId={dynamicSessionId}
+          playerMarker={assignedMarker}
+          roundCount={roundCount}
+          powerupsEnabled={powerupsEnabled}
+          activePowerup={activePowerup}
+          animSpeed={animSpeed}
+          onExitToMenu={() => setCurrentView('MAIN_MENU')}
+        />
+      )}
+
       {isSettingsOpen && (
         <SettingsModal
           difficulty={difficulty}
@@ -68,4 +84,3 @@ const App = () => {
 };
 
 export default App;
-
