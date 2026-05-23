@@ -35,8 +35,6 @@ const Arena = ({
   const [gameState, setGameState] = useState(null);
   const [clashAnnouncement, setClashAnnouncement] = useState('CONNECTING TO BATTLE ENGINE...');
   const [errorMsg, setErrorMsg] = useState('');
-  
-  // NEW: Track whether this specific client has submitted their selection
   const [isMoveLocked, setIsMoveLocked] = useState(false);
   
   const [actionLogs, setActionLogs] = useState([]);
