@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MainMenu from './components/MainMenu/MainMenu';
 import RoundMenu from './components/RoundMenu/RoundMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
@@ -12,10 +12,9 @@ const App = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   
-  // 1. Initialize variables inside the component scope
-  const queryParams = new URLSearchParams(window.location.search);
-  const dynamicSessionId = queryParams.get('room') || 'session_1';
-  const assignedMarker = queryParams.get('player') || 'X';
+  // State for session variables
+  const [dynamicSessionId, setDynamicSessionId] = useState('session_1');
+  const [assignedMarker, setAssignedMarker] = useState('X');
 
   const [difficulty, setDifficulty] = useState('Easy');
   const [animSpeed, setAnimSpeed] = useState('Neutral');
@@ -23,6 +22,16 @@ const App = () => {
   const [roundCount, setRoundCount] = useState(5);
   const [powerupsEnabled, setPowerupsEnabled] = useState(true);
   const [activePowerup, setActivePowerup] = useState('Double Selection');
+
+  // Grab URL parameters on initial load
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    const room = queryParams.get('room');
+    const player = queryParams.get('player');
+
+    if (room) setDynamicSessionId(room);
+    if (player) setAssignedMarker(player);
+  }, []);
 
   const onEnterArena = () => {
     setCurrentView('ARENA');
@@ -53,7 +62,6 @@ const App = () => {
         />
       )}
 
-      {/* 2. Pass the defined variables as props */}
       {currentView === 'ARENA' && (
         <Arena
           sessionId={dynamicSessionId}
@@ -77,7 +85,6 @@ const App = () => {
           onClose={() => setIsSettingsOpen(false)}
         />
       )}
-
 
       {isRulesOpen && <RulesModal onClose={() => setIsRulesOpen(false)} />}
     </>
