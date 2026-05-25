@@ -148,8 +148,6 @@ useEffect(() => {
   };
 
   const handlePickupPowerup = (powerup) => {
-    if (!socket || !socket.connected) return;
-    
     setActivatedPowerup(powerup);
     socket.emit('player_action', { 
       action: 'PICKUP_POWERUP', 
