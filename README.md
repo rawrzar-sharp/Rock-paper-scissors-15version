@@ -15,6 +15,9 @@ Backend API:
 - `POST /api/sessions/<session_id>/move` -> submit move (validates turn)
 - `GET /api/sessions/<session_id>` -> fetch state
 
-Next steps: add React frontend + WebSocket real-time updates + a RabbitMQ consumer worker.
+Steps:
+Do 1 Terminal with:
+uvicorn backend.server:app --reload --port 8000
 
-Rechecked all components and changes ws multiple times.
+Other terminal with:
+Docker compose up --build

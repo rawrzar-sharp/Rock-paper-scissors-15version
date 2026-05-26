@@ -1,431 +1,289 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'; 
-import { io } from 'socket.io-client';
+import React, { useState, useEffect } from 'react';
+import ArenaCircle from './ArenaCircle';
 import './Arena.css';
 
-const API_BASE = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
-
 const Arena = ({
+  socket,
+  setIsSettingsOpen,
+  setIsRulesOpen,
+  initialGameState,
   sessionId,
   playerMarker,
-  roundCount,
   powerupsEnabled,
-  activePowerup,
   onExitToMenu,
-  animSpeed = 'Neutral',
+  animSpeed
 }) => {
-  const GESTURES = useMemo(() => [
-    { name: 'Rock', color: '#ecc94b', emoji: '🪨' },
-    { name: 'Fire', color: '#f56565', emoji: '🔥' },
-    { name: 'Scissors', color: '#4299e1', emoji: '✂️' },
-    { name: 'Snake', color: '#ed64a6', emoji: '🐍' },
-    { name: 'Human', color: '#9f7aea', emoji: '🧍' },
-    { name: 'Tree', color: '#48bb78', emoji: '🌳' },
-    { name: 'Wolf', color: '#805ad5', emoji: '🐺' },
-    { name: 'Sponge', color: '#38b2ac', emoji: '🧽' },
-    { name: 'Paper', color: '#ed8936', emoji: '📄' },
-    { name: 'Air', color: '#a0aec0', emoji: '💨' },
-    { name: 'Water', color: '#667eea', emoji: '💧' },
-    { name: 'Dragon', color: '#e53e3e', emoji: '🐉' },
-    { name: 'Devil', color: '#c53030', emoji: '😈' },
-    { name: 'Lightning', color: '#d69e2e', emoji: '⚡' },
-    { name: 'Gun', color: '#4a5568', emoji: '🔫' }
-  ], []);
-
-  const [socket, setSocket] = useState(null);
-  const [selectedGestures, setSelectedGestures] = useState([]);
-  const [gameState, setGameState] = useState(null);
-  const [clashAnnouncement, setClashAnnouncement] = useState('CONNECTING TO BATTLE ENGINE...');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [isMoveLocked, setIsMoveLocked] = useState(false);
+  const [gameState, setGameState] = useState(initialGameState);
   const [actionLogs, setActionLogs] = useState([]);
-  const [wheelRotation, setWheelRotation] = useState(0);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const [availablePowerups, setAvailablePowerups] = useState([]);
-  const [activatedPowerup, setActivatedPowerup] = useState(null);
-  const [powerupAnimation, setPowerupAnimation] = useState(null);
+  const [clashAnnouncement, setClashAnnouncement] = useState('AWAITING ENGAGEMENT');
+  const [shakeScreen, setShakeScreen] = useState(false);
   
-  const wheelRef = useRef(null);
+  const [stagedGesture, setStagedGesture] = useState(null);
+  const [isPowerupArmed, setIsPowerupArmed] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(35);
+
+  const hasLockedIn = gameState?.selections?.[playerMarker]?.length > 0;
+  const bothUnselected = !gameState?.selections?.X?.length && !gameState?.selections?.O?.length;
+
+  // Track opponent token identity cleanly
   const opponentMarker = playerMarker === 'X' ? 'O' : 'X';
 
-  const pushLog = (text) => {
-    setActionLogs((prev) => [{ id: `${Date.now()}-${Math.random()}`, text }, ...prev]);
-  };
+  // State synchronization engine
+  useEffect(() => {
+    if (!socket) return;
+    const handleSync = (data) => {
+      setGameState(data.state);
+      
+      if (data.log) {
+        setActionLogs((prev) => [{ id: Date.now() + Math.random(), text: data.log }, ...prev].slice(0, 10));
+      }
+      if (data.clash) {
+        setShakeScreen(true);
+        setTimeout(() => setShakeScreen(false), 500);
+        
+        if (data.clash.outcome === 'DRAW' || data.clash.outcome === 'tie') {
+          setClashAnnouncement(`DEADLOCK: ${data.clash.move_x.toUpperCase()}`);
+        } else {
+          setClashAnnouncement(`PLAYER ${data.clash.outcome.replace('_win', '')} STRIKES!`);
+        }
+      }
+    };
+    socket.on('sync_state', handleSync);
+    return () => socket.off('sync_state', handleSync);
+  }, [socket]);
 
-  const spinWheel = (duration = 1000) => {
-    setIsSpinning(true);
-    const spins = 3 + Math.random() * 2; 
-    const targetRotation = wheelRotation + (360 * spins);
-    setWheelRotation(targetRotation);
-    
-    setTimeout(() => {
-      setIsSpinning(false);
-    }, duration);
-  };
-
-// Arena.jsx (Update the useEffect block)
-useEffect(() => {
-  if (!sessionId || !playerMarker) return;
-
-  const newSocket = io(API_BASE, {
-    transports: ['websocket'],
-    query: {
-      room: sessionId,
-      player: playerMarker
+  // Turn reset / round advancement listener
+  useEffect(() => {
+    if (bothUnselected) {
+      setStagedGesture(null);
+      setIsPowerupArmed(false);
+      setTimeLeft(35);
     }
-  });
+  }, [bothUnselected]);
 
-  newSocket.on('connect', () => {
-    console.log('✅ Connected to Battle Engine');
-  });
-
-  newSocket.on('sync_state', (data) => {
-    // Update your game board state here
-    console.log('🔄 State Received:', data);
-  });
-
-  return () => newSocket.disconnect();
-}, [sessionId, playerMarker]);
-
-  const maxChoices = useMemo(() => {
-    if (!gameState) return 1;
-    return powerupsEnabled &&
-      !gameState.powerup_used?.[playerMarker] &&
-      (activatedPowerup === 'Double Selection' || activePowerup === 'Double Selection')
-      ? 2
-      : 1;
-  }, [gameState, powerupsEnabled, playerMarker, activePowerup, activatedPowerup]);
-
-  const handleSelectGesture = (gestureName) => {
-    if (!gameState || gameState.is_paused || gameState.game_over || isMoveLocked) return;
-
-    setSelectedGestures((prev) => {
-      if (prev.includes(gestureName)) {
-        return prev.filter((item) => item !== gestureName);
+  // Precise countdown clock loop
+  useEffect(() => {
+    if (gameState?.game_over) return;
+    if (timeLeft <= 0) {
+      if (!hasLockedIn) {
+        socket.emit('player_action', {
+          action: 'TIMEOUT',
+          sessionId,
+          marker: playerMarker
+        });
       }
-      if (prev.length < maxChoices) {
-        return [...prev, gestureName];
-      }
-      return [prev[prev.length - 1], gestureName];
-    });
-  };
-
-  const handleLockMove = () => {
-    if (!socket || !socket.connected) {
-      setErrorMsg('Cannot lock move: Not connected to server.');
       return;
     }
-    if (selectedGestures.length === 0) return;
 
-    const usesPowerup = selectedGestures.length > 1;
-    const movePayload = {
-      action: 'MOVE',
-      marker: playerMarker,
-      gestures: selectedGestures,
-      use_powerup: usesPowerup,
-    };
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
 
-    if (usesPowerup) {
-      pushLog(`USER ${playerMarker === 'X' ? '1' : '2'} uses POWER UP, DOUBLE SELECTION TRIGGERED`);
+    return () => clearInterval(timer);
+  }, [timeLeft, hasLockedIn, gameState?.game_over, socket, sessionId, playerMarker]);
+
+  // Interactive handler to capture custom powerup selection
+  const handlePowerupToggle = (powerupType) => {
+    if (hasLockedIn || !powerupsEnabled) return;
+    
+    // Check if player has already exhausted this specific utility item
+    const history = gameState?.used_powerups_history?.[playerMarker] || [];
+    if (history.includes(powerupType)) return;
+
+    // Toggle logic or equip choice on the backend
+    const currentActive = gameState?.active_powerup?.[playerMarker];
+    if (currentActive === powerupType) {
+      setIsPowerupArmed(false);
+      // Clean backend active slot choice if unselected
+      socket.emit('player_action', {
+        action: 'PICKUP_POWERUP',
+        powerup: null,
+        sessionId,
+        marker: playerMarker
+      });
+    } else {
+      setIsPowerupArmed(true);
+      socket.emit('player_action', {
+        action: 'PICKUP_POWERUP',
+        powerup: powerupType,
+        sessionId,
+        marker: playerMarker
+      });
     }
-
-    socket.emit('player_action', movePayload);
-    
-    setSelectedGestures([]);
-    setIsMoveLocked(true);
-    setClashAnnouncement('MOVE TRANSMITTED. WAITING FOR RIVAL CONFIRMATION...');
-    spinWheel(500);
   };
 
-  const handleTogglePause = () => {
-    if (!socket || !socket.connected) return;
-    socket.emit('player_action', { action: 'PAUSE', marker: playerMarker });
-  };
-
-  const handleForfeit = () => {
-    if (!socket || !socket.connected) return;
-    socket.emit('player_action', { action: 'FORFEIT', marker: playerMarker });
-    onExitToMenu?.();
-  };
-
-  const handlePickupPowerup = (powerup) => {
-    setActivatedPowerup(powerup);
-    socket.emit('player_action', { 
-      action: 'PICKUP_POWERUP', 
-      marker: playerMarker,
-      powerup: powerup
+  // Turn Commit
+  const handleLockInMove = () => {
+    if (!stagedGesture || hasLockedIn) return;
+    socket.emit('player_action', {
+      action: 'MOVE',
+      gestures: [stagedGesture],
+      use_powerup: isPowerupArmed,
+      sessionId,
+      marker: playerMarker
     });
-    
-    setAvailablePowerups(prev => prev.filter(p => p !== powerup));
   };
 
-  const renderSegmentedHealthBar = (health, isPlayer = true) => {
-    const segments = roundCount;
-    const healthPerSegment = 100 / segments;
-    const filledSegments = Math.ceil(health / healthPerSegment);
-    
-    return (
-      <div className="segmented-health-container" data-testid={isPlayer ? "player-health-bar" : "opponent-health-bar"}>
-        <div className="health-label">
-          Health: {health}%
-        </div>
-        <div className="health-segments">
-          {[...Array(segments)].map((_, index) => {
-            const isFilled = index < filledSegments;
-            const isPartial = index === filledSegments - 1 && health % healthPerSegment !== 0;
-            const fillPercentage = isPartial ? ((health % healthPerSegment) / healthPerSegment) * 100 : 100;
-            
-            return (
-              <div 
-                key={index} 
-                className={`health-segment ${isFilled ? 'filled' : 'empty'}`}
-                style={{
-                  background: isFilled 
-                    ? `linear-gradient(to right, #800000 ${fillPercentage}%, #edf2f7 ${fillPercentage}%)` 
-                    : '#edf2f7'
-                }}
-              >
-                {isFilled && '❤️'}
-              </div>
-            );
-          })}
-        </div>
-        <div className="health-bar-backdrop">
-          <div 
-            className="health-bar-fill" 
-            style={{ width: `${Math.max(0, health)}%` }}
-          />
-        </div>
-      </div>
-    );
+  const handleForfeitArena = () => {
+    if (window.confirm('Are you sure you want to abandon the match?')) {
+      socket.emit('player_action', { action: 'FORFEIT', sessionId, marker: playerMarker });
+    }
   };
 
-  if (!gameState) {
-    return (
-      <div className="arena-loading">
-        <p className="loading-text">{clashAnnouncement}</p>
-        {errorMsg && <p className="error-text">{errorMsg}</p>}
-      </div>
-    );
-  }
+  // Safe UI Rendering calculations
+  const myHealth = gameState?.health?.[playerMarker] ?? 5;
+  const oppHealth = gameState?.health?.[opponentMarker] ?? 5;
+  const totalRounds = gameState?.max_rounds ?? 5;
+
+  const renderHealthBlocks = (current, total) => {
+    return Array.from({ length: total }).map((_, i) => (
+      <div 
+        key={i} 
+        className={`health-bar-segment ${i < current ? 'active-vital' : 'spent-vital'}`} 
+      />
+    ));
+  };
+
+  const AVAILABLE_POWERUPS = ['Shield', 'Double Damage', 'Heal'];
 
   return (
-    <div className="arena-container" data-testid="arena-container">
-      <div className="arena-wrapper">
-        
-        <button
-          onClick={handleForfeit}
-          className="back-button"
-          data-testid="back-button"
-        >
-          &lt;
-        </button>
+    <div className={`arena-container ${shakeScreen ? 'arena-screen-shake' : ''}`}>
+      
+      {/* 1. TOP UTILITY HEADER */}
+      <header className="arena-top-nav">
+        <div className="nav-group-left">
+          <button onClick={() => setIsSettingsOpen(true)} className="nav-control-btn">⚙️ SYS CONFIG</button>
+          <button onClick={() => setIsRulesOpen(true)} className="nav-control-btn rules-btn-highlight">📖 GAME RULES</button>
+        </div>
+        <div className="nav-room-badge">
+          ARENA: <span className="room-code-txt">{sessionId}</span>
+        </div>
+        <div className="nav-group-right">
+          <button onClick={handleForfeitArena} className="nav-control-btn forfeit-btn">🏳️ FORFEIT</button>
+        </div>
+      </header>
 
-        <div className="arena-controls">
-          <button 
-            onClick={handleTogglePause} 
-            className="control-button"
-            data-testid="pause-button"
-          >
-            {gameState.is_paused ? '▶ RESUME' : '⏸ PAUSE'}
-          </button>
-          <button 
-            onClick={handleForfeit} 
-            className="control-button"
-            data-testid="quit-button"
-          >
-            🏳️ QUIT
-          </button>
+      {/* 2. ISOLATED CORE ARENA (WHEEL AND CHRONO ANNOUNCERS) */}
+      <main className="arena-center-stage">
+        <div className="arena-hud-announcer">
+          <div className="ticker-timer-capsule">
+            <span className="timer-label">MATCH TIME</span>
+            <span className={`timer-clock ${timeLeft <= 10 ? 'imminent-danger' : ''}`}>{timeLeft}s</span>
+          </div>
+          <h1 className="clash-stream-title">{clashAnnouncement}</h1>
+          <div className="player-identity-tag">OPERATING NODE: PLAYER [{playerMarker}]</div>
         </div>
 
-        <div className="arena-main">
-          
-          {/* LEFT SIDE: PLAYER AREA */}
-          <div className="player-area">
-            
-            <div className="player-health-section">
-              <div className="player-name">{gameState.players?.[playerMarker] || 'You'} ({playerMarker})</div>
-              {renderSegmentedHealthBar(gameState.health?.[playerMarker] || 0, true)}
+        <div className="wheel-housing-vault">
+          <ArenaCircle 
+            animSpeed={animSpeed}
+            isInteractive={!hasLockedIn && !gameState?.game_over}
+            onSelectGesture={setStagedGesture}
+            selectedGesture={stagedGesture}
+          />
+        </div>
+      </main>
+
+      {/* 3. CONSOLIDATED COMBAT CONTROL DECK (BOTTOM LAYOUT) */}
+      <footer className="arena-control-deck-floor">
+        
+        {/* ROW 1: STATUS PANELS (HEALTH READOUTS) */}
+        <div className="deck-status-row">
+          {/* Your Profile Panel */}
+          <div className="status-card-panel local-user">
+            <div className="status-meta">
+              <span className="user-title-tag">PLAYER {playerMarker} (YOU)</span>
+              <span className="numeric-hp">{myHealth} / {totalRounds} HP</span>
             </div>
+            <div className="health-grid-bar">
+              {renderHealthBlocks(myHealth, totalRounds)}
+            </div>
+          </div>
 
-            {/* Animated Gesture Wheel */}
-            <div className="wheel-container">
-              <div 
-                ref={wheelRef}
-                className={`gesture-wheel ${isSpinning ? 'spinning' : ''}`}
-                style={{ 
-                  transform: `rotate(${wheelRotation}deg)`,
-                  transition: isSpinning ? 'transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1)' : 'none'
-                }}
-                data-testid="gesture-wheel"
-              >
-                {GESTURES.map((g, index) => {
-                  const angle = (index * 2 * Math.PI) / GESTURES.length - Math.PI / 2;
-                  const radius = 160;
-                  const x = Math.round(radius * Math.cos(angle));
-                  const y = Math.round(radius * Math.sin(angle));
-                  const isSelected = selectedGestures.includes(g.name);
+          {/* Opponent Profile Panel */}
+          <div className="status-card-panel rival-user">
+            <div className="status-meta">
+              <span className="user-title-tag">OPPONENT (PLAYER {opponentMarker})</span>
+              <span className="numeric-hp">{oppHealth} / {totalRounds} HP</span>
+            </div>
+            <div className="health-grid-bar reverse-layout">
+              {renderHealthBlocks(oppHealth, totalRounds)}
+            </div>
+          </div>
+        </div>
 
+        {/* ROW 2: INTERACTIVE CONTROLS & LOG TICKER */}
+        <div className="deck-interaction-row">
+          
+          {/* Action Module */}
+          <div className="interaction-cell controls-vault">
+            {powerupsEnabled && (
+              <div className="powerup-button-rack">
+                {AVAILABLE_POWERUPS.map((pType) => {
+                  const isUsed = gameState?.used_powerups_history?.[playerMarker]?.includes(pType);
+                  const isActive = gameState?.active_powerup?.[playerMarker] === pType;
                   return (
                     <button
-                      key={g.name}
-                      disabled={isMoveLocked}
-                      onClick={() => handleSelectGesture(g.name)}
-                      className={`gesture-button ${isSelected ? 'selected' : ''}`}
-                      style={{
-                        transform: `translate(${x}px, ${y}px)`,
-                        background: g.color,
-                      }}
-                      title={g.name}
-                      data-testid={`gesture-${g.name.toLowerCase()}`}
+                      key={pType}
+                      disabled={hasLockedIn || isUsed || gameState?.game_over}
+                      onClick={() => handlePowerupToggle(pType)}
+                      className={`power-node-btn ${isActive ? 'equipped-active' : ''} ${isUsed ? 'spent-node' : ''}`}
                     >
-                      <span className="gesture-emoji">{g.emoji}</span>
-                      <span className="gesture-name">{g.name.substring(0, 4)}</span>
+                      <span className="node-indicator"></span>
+                      <span className="node-text">{pType.toUpperCase()}</span>
                     </button>
                   );
                 })}
-
-                <div className="wheel-center">
-                  <h2 className="wheel-instruction">
-                    {isMoveLocked ? "🔒 Locked" : maxChoices > 1 ? "Choose 2" : "Choose 1"}
-                  </h2>
-                </div>
               </div>
-            </div>
-
-            {/* Power-ups Section */}
-            <div className="powerups-section" data-testid="powerups-section">
-              <div className="powerups-label">🎁 Power-ups Available</div>
-              <div className={`powerups-container ${powerupAnimation || ''}`}>
-                {availablePowerups.length > 0 ? (
-                  availablePowerups.map((powerup, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handlePickupPowerup(powerup)}
-                      className="powerup-button available"
-                      data-testid={`powerup-${powerup.toLowerCase().replace(' ', '-')}`}
-                    >
-                      <span className="powerup-icon">
-                        {powerup === 'Double Selection' && '⚔️'}
-                        {powerup === 'Shield' && '🛡️'}
-                        {powerup === 'Double Damage' && '💥'}
-                      </span>
-                      <span className="powerup-name">{powerup}</span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="no-powerups">
-                    {powerupsEnabled ? 'Win rounds to earn powerups!' : 'Powerups disabled'}
-                  </div>
-                )}
-              </div>
-              
-              {activatedPowerup && (
-                <div className="activated-powerup" data-testid="activated-powerup">
-                  <span className="activated-label">Active:</span>
-                  <span className="activated-name">{activatedPowerup}</span>
-                </div>
-              )}
-            </div>
-
-            <div className="action-area">
-              <div className="announcement-text">{clashAnnouncement}</div>
-              {!gameState.game_over ? (
-                <button
-                  disabled={selectedGestures.length === 0 || isMoveLocked}
-                  onClick={handleLockMove}
-                  className={`lock-button ${selectedGestures.length > 0 && !isMoveLocked ? 'active' : ''}`}
-                  data-testid="lock-move-button"
-                >
-                  {isMoveLocked ? '✓ SUBMITTED' : `CONFIRM (${selectedGestures.length})`}
-                </button>
-              ) : (
-                <div className="game-over-section">
-                  <span className="winner-text">
-                    {gameState.winner === 'DRAW' ? '🚨 MATCH DRAWN' : `🏆 WINNER: PLAYER ${gameState.winner}`}
-                  </span>
-                  <button 
-                    onClick={onExitToMenu} 
-                    className="return-button"
-                    data-testid="return-home-button"
-                  >
-                    RETURN HOME
-                  </button>
-                </div>
-              )}
-            </div>
-
-          </div>
-
-          {/* RIGHT SIDE: OPPONENT AREA */}
-          <div className="opponent-area">
-            
-            <div className="opponent-info">
-              <span className="opponent-label">RIVAL OPPONENT</span>
-              <h2 className="opponent-name">
-                {gameState.players?.[opponentMarker] || 'Rival'} ({opponentMarker})
-              </h2>
-
-              {renderSegmentedHealthBar(gameState.health?.[opponentMarker] || 0, false)}
-              
-              <div className="opponent-points">
-                {gameState.points?.[opponentMarker] || 0} PTS
-              </div>
-            </div>
-
-            <div className="opponent-wheel-preview">
-              {GESTURES.slice(0, 7).map((g, index) => {
-                const angle = (index * Math.PI) / 6 - Math.PI / 2;
-                const radius = 120;
-                const x = Math.round(radius * Math.cos(angle));
-                const y = Math.round(radius * Math.sin(angle));
-
-                return (
-                  <div
-                    key={`rival-${index}`}
-                    className="opponent-gesture-dot"
-                    style={{
-                      transform: `translate(${x}px, ${y}px)`,
-                      background: g.color,
-                    }}
-                  />
-                );
-              })}
-            </div>
-
-            <div className="opponent-status">
-              <span className="status-main">
-                {isMoveLocked ? "⏳ Evaluating..." : "✅ Ready!"}
-              </span>
-              <span className="status-sub">
-                {isMoveLocked ? "Processing match data..." : "Awaiting your move..."}
-              </span>
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* BOTTOM: ACTION LOGS */}
-        <div className="action-logs-container" data-testid="action-logs">
-          <div className="logs-header">
-            <span>⚡ LIVE BATTLE LOGS (WEBSOCKET STREAM)</span>
-            <span className="live-indicator">● LIVE</span>
-          </div>
-
-          <div className="logs-content">
-            {actionLogs.length === 0 ? (
-              <span className="logs-empty">Waiting for match operations...</span>
-            ) : (
-              actionLogs.map((log) => (
-                <div key={log.id} className="log-entry">
-                  <span className="log-timestamp">[{new Date().toLocaleTimeString()}]</span> {log.text}
-                </div>
-              ))
             )}
+
+            <div className="lock-mechanism-bar">
+              <button
+                className={`deck-trigger-lock-btn ${hasLockedIn ? 'locked-engaged' : stagedGesture ? 'staged-ready' : ''}`}
+                onClick={handleLockInMove}
+                disabled={!stagedGesture || hasLockedIn || gameState?.game_over}
+              >
+                {hasLockedIn 
+                  ? '🔒 RETRANSMITTING CHOICE...' 
+                  : stagedGesture 
+                    ? `ENGAGE: ${stagedGesture.toUpperCase()} ${isPowerupArmed ? '[+MODIFIER]' : ''}` 
+                    : 'SELECT GESTURE TO ENGAGE'}
+              </button>
+            </div>
+          </div>
+
+          {/* Live Action Logs Module */}
+          <div className="interaction-cell ticker-vault">
+            <div className="ticker-header-banner">⚡ FEED RECORDINGS</div>
+            <div className="ticker-scroller-window">
+              {actionLogs.length === 0 ? (
+                <div className="ticker-line-void">Systems initialized. Awaiting engagement profiles...</div>
+              ) : (
+                actionLogs.map((log) => (
+                  <div key={log.id} className="ticker-line-entry">
+                    <span className="ticker-timestamp">]</span>
+                    <span className="ticker-string-body">{log.text}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+        </div>
+      </footer>
+
+      {/* 4. GAME OVER OVERLAY TERMINAL */}
+      {gameState?.game_over && (
+        <div className="terminal-screen-overlay">
+          <div className="terminal-box">
+            <h2 className="terminal-header">MATCH TERMINATED</h2>
+            <p className="terminal-winner">
+              <span>{gameState.winner === 'DRAW' ? '🚨 MUTUAL DESTRUCTION' : `🏆 VICTOR OUTCOME: PLAYER ${gameState.winner}`}</span>
+            </p>
+            <button onClick={onExitToMenu} className="terminal-return-btn">DISCONNECT LOBBY FEED</button>
           </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 };

@@ -1,0 +1,101 @@
+/* Container footprint fix to allow deep layer click registration */
+.arena-circle-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  animation: arenaSpin 40s linear infinite;
+  z-index: 5; /* FIX: Dropped from 1000 !important to not block UI/Modals */
+}
+
+.middle-stage-wrapper {
+  pointer-events: none; /* Lets clicks pass through the invisible box */
+}
+
+/* But ensure the circle inside it CAN be clicked */
+.middle-stage-wrapper .arena-circle-container {
+  pointer-events: auto; 
+}
+
+/* Speed Constants */
+.arena-circle-container.slow { animation-duration: 60s; }
+.arena-circle-container.neutral { animation-duration: 40s; }
+.arena-circle-container.fast { animation-duration: 20s; }
+
+/* Interactive Hover state: holds rotation freeze for tactical aiming mechanics */
+.arena-circle-container.interactive:hover,
+.arena-circle-container.interactive:hover .arena-hand-img {
+  animation-play-state: paused !important;
+}
+
+.arena-hand-wrapper {
+  position: absolute;
+  top: -40px;
+  left: -40px;
+  cursor: crosshair;
+  transition: transform 0.18s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.arena-circle-container.disabled .arena-hand-wrapper {
+  cursor: not-allowed;
+  filter: grayscale(0.6) cubic-bezier(0.175, 0.885, 0.32, 1);
+  opacity: 0.5;
+}
+
+/* NEW: Highlight the selected gesture */
+.arena-hand-wrapper.selected .arena-hand-img {
+  border-color: #48bb78 !important;
+  box-shadow: 0 0 25px rgba(72, 187, 120, 0.9) !important;
+  background: rgba(72, 187, 120, 0.25) !important;
+  transform: scale(1.2);
+  z-index: 60;
+}
+
+.arena-hand-wrapper:hover .arena-hand-img {
+  filter: drop-shadow(0 0 15px #f56565) brightness(1.25);
+  border-color: #f56565;
+  background: rgba(245, 101, 101, 0.15);
+}
+
+.arena-hand-img {
+  width: 80px;
+  height: 80px;
+  border-radius: 18px;
+  object-fit: contain;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  display: block;
+  animation: arenaCounterSpin 40s linear infinite;
+  transition: all 0.2s ease;
+}
+
+.arena-circle-container.slow .arena-hand-img { animation-duration: 60s; }
+.arena-circle-container.fast .arena-hand-img { animation-duration: 20s; }
+
+@keyframes arenaSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes arenaCounterSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+.arena-gesture-tooltip {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid #f56565;
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  pointer-events: none;
+  white-space: nowrap;
+}

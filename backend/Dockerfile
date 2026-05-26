@@ -1,13 +1,18 @@
-FROM python:3.11-slim
+# Use an official Python runtime
+FROM python:3.12-slim
 
+# Set work directory
 WORKDIR /app
 
-# Copy and install requirements first (better caching)
+# Install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of your backend source code
+# Copy current directory code
 COPY . .
 
-# Leave CMD blank or default to flask since docker-compose overrides it anyway
-CMD ["python", "app.py"]
+# Expose port
+EXPOSE 8000
+
+# Command to run the application
+CMD ["python", "server.py"]
