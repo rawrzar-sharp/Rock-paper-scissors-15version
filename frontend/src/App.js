@@ -9,7 +9,8 @@ import Lobby from './components/Lobby/Lobby';
 
 import './styles.css';
 
-const API_BASE = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8000';
+//  AFTER
+const API_BASE = process.env.REACT_APP_BACKEND_URL || 'http://34.44.209.170:8000';
 
 const App = () => {
   const [currentView, setCurrentView] = useState('MAIN_MENU');
