@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import MainMenu from './components/MainMenu/MainMenu';
-import RoundMenu from './components/RoundMenu/RoundMenu';
 import SettingsModal from './components/SettingsModal/SettingsModal';
 import RulesModal from './components/RulesModal/RulesModal';
 import Arena from './components/Arena/Arena';
