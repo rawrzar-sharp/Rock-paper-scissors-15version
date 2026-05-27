@@ -6,11 +6,12 @@ import SettingsModal from './components/SettingsModal/SettingsModal';
 import RulesModal from './components/RulesModal/RulesModal';
 import Arena from './components/Arena/Arena';
 import Lobby from './components/Lobby/Lobby';
+import TutorialArena from './components/Arena/TutorialArena';
 
 import './styles.css';
 
 //  AFTER
-const API_BASE = process.env.REACT_APP_BACKEND_URL || 'http://34.44.209.170:8000';
+const API_BASE = process.env.REACT_APP_BACKEND_URL || 'http://35.225.155.246:8000';
 
 const App = () => {
   const [currentView, setCurrentView] = useState('MAIN_MENU');
@@ -198,6 +199,13 @@ const handleStartGame = () => {
           setCurrentView={setCurrentView} 
           setIsSettingsOpen={setIsSettingsOpen} 
           animSpeed={animSpeed} 
+        />
+      )}
+
+      {currentView === 'TUTORIAL' && (
+        <TutorialArena 
+          animSpeed={animSpeed}
+          onExitToMenu={() => setCurrentView('MAIN_MENU')}
         />
       )}
 

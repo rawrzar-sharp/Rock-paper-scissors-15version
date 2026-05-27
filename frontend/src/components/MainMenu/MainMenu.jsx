@@ -5,7 +5,6 @@ import './mainMenu.css';
 const MainMenu = ({ setCurrentView, setIsSettingsOpen, animSpeed }) => {
   return (
     <div className="main-container">
-      {/* VIEW 1: MAIN MENU */}
       <>
         <RotatingCircle animSpeed={animSpeed} isMini={false} />
 
@@ -21,9 +20,12 @@ const MainMenu = ({ setCurrentView, setIsSettingsOpen, animSpeed }) => {
             Settings
           </button>
           <button className="btn btn-play" onClick={() => setCurrentView('ROUND_MENU')}>
-            PLAY
+            PLAY MULTIPLAYER
           </button>
-          <button className="btn btn-practice">Practice (Bot)</button>
+          {/* TOMBOL TUTORIAL BARU */}
+          <button className="btn btn-practice" onClick={() => setCurrentView('TUTORIAL')}>
+            PRACTICE (TUTORIAL)
+          </button>
         </div>
       </>
     </div>
@@ -31,4 +33,3 @@ const MainMenu = ({ setCurrentView, setIsSettingsOpen, animSpeed }) => {
 };
 
 export default MainMenu;
-

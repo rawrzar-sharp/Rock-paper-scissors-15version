@@ -24,7 +24,7 @@ async def run_client():
     
     # 1. Connect with Query Parameters (Required for your server's @sio.event connect handler)
     print(f"Connecting to Arena via Socket.IO...")
-        await sio.connect('http://34.44.209.170:8000',
+        await sio.connect('http://35.225.155.246:8000',
         socketio_path='/socket.io',
         query={'room': session_id, 'player': player_marker}
     )
