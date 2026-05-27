@@ -5,21 +5,36 @@ const Lobby = ({ onConnect, isConnected, isHost, challengerJoined, onStartGame, 
   const [inputCode, setInputCode] = useState('');
   const [isHovered, setIsHovered] = useState(null);
 
-  // Shared Living Ecosystem Background Elements
+  // Re-architected Structured Landscape Background Component
   const HabitatBackground = () => (
     <div className="habitat-container">
-      <div className="habitat-element dragon">🐉</div>
-      <div className="habitat-element devil">😈</div>
-      <div className="habitat-element human">🧍</div>
-      <div className="habitat-element wolf">🐺</div>
-      <div className="habitat-element snake">🐍</div>
-      <div className="habitat-element fire">🔥</div>
-      <div className="habitat-element cloud-lightning">☁️⚡</div>
-      <div className="habitat-element wind">💨</div>
-      <div className="habitat-element tree-1">🌲</div>
-      <div className="habitat-element tree-2">🌲</div>
-      <div className="habitat-element rock">🪨</div>
-      <div className="habitat-element water">🌊</div>
+      {/* Upper Atmospheric Layer */}
+      <div className="zone-sky">
+        <div className="habitat-element dragon">🐉</div>
+        <div className="habitat-element cloud-lightning">☁️⚡</div>
+        <div className="habitat-element wind">💨</div>
+      </div>
+      
+      {/* Ground Foundation Layer */}
+      <div className="zone-land">
+        <div className="habitat-element tree-1">🌲</div>
+        <div className="habitat-element tree-2">🌲</div>
+        <div className="habitat-element rock">🪨</div>
+        <div className="habitat-element human">🧍</div>
+        <div className="habitat-element wolf">🐺</div>
+        <div className="habitat-element devil">😈</div>
+        <div className="habitat-element snake">🐍</div>
+        <div className="habitat-element fire">🔥</div>
+
+        {/* Dedicated Circular Lake Zone */}
+        <div className="zone-lake">
+          <div className="lake-water-cluster">
+            <span className="water-emoji wave-1">🌊</span>
+            <span className="water-emoji wave-2">🌊</span>
+            <span className="water-emoji wave-3">🌊</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
