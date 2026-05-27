@@ -5,11 +5,31 @@ const Lobby = ({ onConnect, isConnected, isHost, challengerJoined, onStartGame, 
   const [inputCode, setInputCode] = useState('');
   const [isHovered, setIsHovered] = useState(null);
 
-  // VIEW 1: ENTER CODE
+  // Shared Living Ecosystem Background Elements
+  const HabitatBackground = () => (
+    <div className="habitat-container">
+      <div className="habitat-element dragon">🐉</div>
+      <div className="habitat-element devil">😈</div>
+      <div className="habitat-element human">🧍</div>
+      <div className="habitat-element wolf">🐺</div>
+      <div className="habitat-element snake">🐍</div>
+      <div className="habitat-element fire">🔥</div>
+      <div className="habitat-element cloud-lightning">☁️⚡</div>
+      <div className="habitat-element wind">💨</div>
+      <div className="habitat-element tree-1">🌲</div>
+      <div className="habitat-element tree-2">🌲</div>
+      <div className="habitat-element rock">🪨</div>
+      <div className="habitat-element water">🌊</div>
+    </div>
+  );
+
+  // VIEW 1: ENTER ROOM CODE
   if (!isConnected) {
     return (
       <div className="lobby-container blue-theme">
         <div className="grid-overlay"></div>
+        <HabitatBackground />
+        
         <div className="lobby-box">
           <div className="decorative-header">
             <span className="dot"></span>
@@ -40,7 +60,7 @@ const Lobby = ({ onConnect, isConnected, isHost, challengerJoined, onStartGame, 
               onMouseEnter={() => setIsHovered('host')}
               onMouseLeave={() => setIsHovered(null)}
             >
-              <span className="btn-text">INITIALIZE (HOST)</span>
+              HOST PROTOCOL
             </button>
             <button 
               className="btn-lobby join-btn" 
@@ -49,23 +69,28 @@ const Lobby = ({ onConnect, isConnected, isHost, challengerJoined, onStartGame, 
               onMouseEnter={() => setIsHovered('join')}
               onMouseLeave={() => setIsHovered(null)}
             >
-              <span className="btn-text">INFILTRATE (CHALLENGER)</span>
+              JOIN MATRIX
             </button>
           </div>
-          
-          <button className="btn-cancel" onClick={onCancel}>
-            [ TERMINATE CONNECTION ]
-          </button>
+          <button className="btn-cancel" onClick={onCancel}>CANCEL</button>
         </div>
       </div>
     );
   }
 
-  // VIEW 2: WAITING ROOM
+  // VIEW 2: WAITING LOBBY
   return (
     <div className="lobby-container blue-theme">
       <div className="grid-overlay"></div>
-      <div className="lobby-box waiting-box">
+      <HabitatBackground />
+
+      <div className="lobby-box">
+        <div className="decorative-header">
+          <span className="dot"></span>
+          <span className="dot"></span>
+          <span className="dot"></span>
+        </div>
+        
         <div className="status-header">
           <h2>UPLINK ESTABLISHED</h2>
           <div className="room-badge">ROOM: {roomCode}</div>

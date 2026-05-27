@@ -1,3 +1,7 @@
+/* ==========================================================================
+   1. CORE THEME, LAYOUT & GLASSMORPHISM INTERFACE (Original Styles)
+   ========================================================================== */
+
 /* Core Theme & Background */
 .lobby-container.blue-theme {
   display: flex;
@@ -31,180 +35,154 @@
 
 /* The Main Glassmorphism Box */
 .lobby-box {
-  background: rgba(17, 34, 64, 0.7);
+  background: rgba(17, 34, 64, 0.75);
   backdrop-filter: blur(12px);
-  padding: 40px;
-  border-radius: 16px;
-  text-align: center;
-  box-shadow: 0 10px 30px -10px rgba(2, 12, 27, 0.7), 0 0 15px rgba(100, 255, 218, 0.1);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(100, 255, 218, 0.2);
-  width: 420px;
-  z-index: 2;
+  border-radius: 16px;
+  padding: 40px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 40px rgba(2, 12, 27, 0.7);
+  text-align: center;
   position: relative;
-  transition: all 0.3s ease;
+  z-index: 2; /* Keeps form elements above moving habitat elements safely */
 }
 
-.lobby-box:hover {
-  box-shadow: 0 10px 30px -10px rgba(2, 12, 27, 0.7), 0 0 25px rgba(100, 255, 218, 0.2);
-  border: 1px solid rgba(100, 255, 218, 0.4);
-}
-
-/* Typography Enhancements */
+/* Decorative Card Header Dots */
 .decorative-header {
   display: flex;
   gap: 8px;
-  margin-bottom: 20px;
+  position: absolute;
+  top: 16px;
+  left: 20px;
 }
 
-.dot {
-  width: 12px;
-  height: 12px;
+.decorative-header .dot {
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  background: #233554;
+  background: rgba(100, 255, 218, 0.3);
 }
-.dot:nth-child(1) { background: #ff5f56; }
-.dot:nth-child(2) { background: #ffbd2e; }
-.dot:nth-child(3) { background: #27c93f; }
 
+/* Typography elements */
 .glitch-text {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: 3px;
+  margin: 10px 0 5px 0;
   color: #64ffda;
-  margin: 0;
-  letter-spacing: 2px;
-  font-weight: bold;
   text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
 }
 
 .subtitle {
+  font-size: 0.85rem;
+  letter-spacing: 2px;
   color: #8892b0;
-  font-size: 0.9rem;
-  margin-top: 5px;
-  letter-spacing: 1px;
+  margin-bottom: 35px;
 }
 
-/* Interactive Input */
+/* Input Fields Modules */
 .input-wrapper {
   position: relative;
-  margin: 30px 0;
+  margin-bottom: 30px;
 }
 
 .room-input {
   width: 100%;
   padding: 16px;
-  font-size: 1.5rem;
-  text-align: center;
-  border: 2px solid #233554;
+  background: #0a1930;
+  border: 1px solid #233554;
   border-radius: 8px;
-  background: #0a192f;
   color: #64ffda;
+  font-size: 1.3rem;
+  font-family: inherit;
+  text-align: center;
+  letter-spacing: 6px;
   font-weight: bold;
-  letter-spacing: 4px;
+  outline: none;
   transition: all 0.3s ease;
   box-sizing: border-box;
 }
 
 .room-input:focus {
-  outline: none;
   border-color: #64ffda;
-  box-shadow: inset 0 0 10px rgba(100, 255, 218, 0.1), 0 0 20px rgba(100, 255, 218, 0.2);
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.15);
 }
 
 .room-input::placeholder {
-  color: #495670;
   letter-spacing: 2px;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  color: #495670;
 }
 
-/* Buttons */
+/* Interactive Action Buttons Framework */
 .button-group {
   display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-bottom: 25px;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .btn-lobby {
-  padding: 16px;
-  border: none;
+  flex: 1;
+  padding: 16px 20px;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-family: inherit;
+  font-size: 0.95rem;
   font-weight: bold;
+  letter-spacing: 1px;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: inherit;
-  letter-spacing: 1px;
-  position: relative;
-  overflow: hidden;
+  border: none;
 }
 
 .btn-lobby:disabled {
-  opacity: 0.4;
+  background: #112240 !important;
+  color: #495670 !important;
+  border: 1px solid #233554 !important;
   cursor: not-allowed;
-  transform: none !important;
   box-shadow: none !important;
+  transform: none !important;
 }
 
-/* Host - Deep Blue */
 .host-btn {
-  background: #112240;
-  color: #64ffda;
+  background: transparent;
   border: 1px solid #64ffda;
+  color: #64ffda;
 }
-.host-btn:not(:disabled):hover {
+
+.host-btn:hover:not(:disabled) {
   background: rgba(100, 255, 218, 0.1);
-  box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.2);
   transform: translateY(-2px);
 }
 
-/* Join - Electric Cyan */
 .join-btn {
-  background: #233554;
-  color: #57cbff;
-  border: 1px solid #57cbff;
-}
-.join-btn:not(:disabled):hover {
-  background: rgba(87, 203, 255, 0.1);
-  box-shadow: 0 0 15px rgba(87, 203, 255, 0.4);
-  transform: translateY(-2px);
-}
-
-/* Start Game - Engaging Pulse */
-.start-btn {
   background: #64ffda;
-  color: #0a192f;
-  margin-top: 20px;
-  width: 100%;
-  box-shadow: 0 0 15px rgba(100, 255, 218, 0.4);
-}
-.start-btn:hover {
-  background: #a8ffec;
-  box-shadow: 0 0 25px rgba(100, 255, 218, 0.6);
-  transform: translateY(-2px) scale(1.02);
+  color: #0a1930;
 }
 
-.engage-pulse {
-  animation: startPulse 2s infinite;
-}
-@keyframes startPulse {
-  0% { box-shadow: 0 0 0 0 rgba(100, 255, 218, 0.4); }
-  70% { box-shadow: 0 0 0 15px rgba(100, 255, 218, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(100, 255, 218, 0); }
+.join-btn:hover:not(:disabled) {
+  background: #52deba;
+  box-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+  transform: translateY(-2px);
 }
 
 .btn-cancel {
   background: transparent;
-  color: #8892b0;
   border: none;
+  color: #8892b0;
   cursor: pointer;
   font-family: inherit;
   font-size: 0.9rem;
   transition: color 0.2s;
 }
+
 .btn-cancel:hover {
   color: #ff5f56;
 }
 
-/* Waiting Room Specifics */
+/* Waiting Room Specifics Layout */
 .room-badge {
   display: inline-block;
   padding: 8px 16px;
@@ -227,7 +205,7 @@
 .highlight-blue { color: #64ffda; font-size: 1rem; }
 .highlight-cyan { color: #57cbff; font-size: 1rem; }
 
-/* Radar Animations */
+/* Radar Status Ping Animations */
 .radar-ping {
   width: 20px;
   height: 20px;
@@ -242,35 +220,180 @@
 
 .radar-ping.success {
   background: #64ffda;
-  box-shadow: 0 0 15px #64ffda;
+  animation: pingSuccess 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 @keyframes pingScan {
-  75%, 100% { transform: scale(3); opacity: 0; }
+  0% { box-shadow: 0 0 0 0 rgba(255, 189, 46, 0.7); }
+  100% { box-shadow: 0 0 0 15px rgba(255, 189, 46, 0); }
 }
 
-.success-text {
-  color: #64ffda;
-  font-weight: bold;
-  font-size: 1.2rem;
-  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+@keyframes pingSuccess {
+  0% { box-shadow: 0 0 0 0 rgba(100, 255, 218, 0.7); }
+  100% { box-shadow: 0 0 0 15px rgba(100, 255, 218, 0); }
 }
 
-.pulse-text {
-  color: #8892b0;
-  animation: textPulse 2s infinite;
-  letter-spacing: 1px;
+.pulse-text { animation: textPulse 2s ease-in-out infinite; color: #8892b0; font-size: 0.9rem; }
+.success-text { color: #64ffda; font-weight: bold; letter-spacing: 1px; }
+
+@keyframes textPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+.start-btn {
+  background: #64ffda;
+  color: #0a1930;
+  width: 100%;
+  margin-top: 20px;
 }
 
-@keyframes textPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+.start-btn:hover {
+  background: #52deba;
+  box-shadow: 0 0 25px rgba(100, 255, 218, 0.4);
 }
 
-.mt-4 { margin-top: 15px; }
-.fade-in { animation: fadeIn 0.5s ease-in; }
+.fade-in { animation: fadeIn 0.4s ease-out forwards; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+
+/* ==========================================================================
+   2. RPS-15 LIVING NATURAL HABITAT BACKGROUND LAYER 
+   ========================================================================== */
+
+.habitat-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Allows user to click on buttons behind them safely */
+  z-index: 1;
+  overflow: hidden;
 }
+
+.habitat-element {
+  position: absolute;
+  user-select: none;
+}
+
+/* --- Element 1: Dragon Patrol (High Sky) --- */
+.habitat-element.dragon {
+  top: 10%;
+  font-size: 3.5rem;
+  opacity: 0.65;
+  filter: drop-shadow(0 0 15px rgba(255, 95, 86, 0.5));
+  animation: flyDragon 32s linear infinite;
+}
+
+@keyframes flyDragon {
+  0% { left: -10%; transform: scaleX(-1) translateY(0); }
+  48% { transform: scaleX(-1) translateY(-15px); }
+  50% { left: 110%; transform: scaleX(1) translateY(-15px); }
+  52% { transform: scaleX(1) translateY(-15px); }
+  98% { transform: scaleX(1) translateY(0); }
+  100% { left: -10%; transform: scaleX(-1) translateY(0); }
+}
+
+/* --- Element 2: Devil Roaming (Ground Layer) --- */
+.habitat-element.devil {
+  bottom: 14%;
+  font-size: 2.5rem;
+  opacity: 0.6;
+  filter: drop-shadow(0 0 12px #ff0055);
+  animation: patrolDevil 22s ease-in-out infinite;
+}
+
+@keyframes patrolDevil {
+  0% { left: 12%; transform: scale(1); }
+  45% { transform: scale(1); }
+  50% { left: 78%; transform: scaleX(-1); }
+  95% { transform: scaleX(-1); }
+  100% { left: 12%; transform: scale(1); }
+}
+
+/* --- Element 3: Wolf Sentry --- */
+.habitat-element.wolf {
+  bottom: 8%;
+  font-size: 2.2rem;
+  opacity: 0.55;
+  animation: patrolWolf 18s ease-in-out infinite;
+}
+
+@keyframes patrolWolf {
+  0% { right: 8%; transform: scaleX(-1); }
+  45% { transform: scaleX(-1); }
+  50% { right: 65%; transform: scale(1); }
+  95% { transform: scale(1); }
+  100% { right: 8%; transform: scaleX(-1); }
+}
+
+/* --- Element 4: Slithering Snake --- */
+.habitat-element.snake {
+  bottom: 24%;
+  left: 20%;
+  font-size: 1.8rem;
+  opacity: 0.6;
+  animation: slitherSnake 4s ease-in-out infinite alternate;
+}
+
+@keyframes slitherSnake {
+  0% { transform: translateX(0) rotate(0deg); }
+  50% { transform: translateX(15px) rotate(5deg) scaleY(0.95); }
+  100% { transform: translateX(30px) rotate(-5deg); }
+}
+
+/* --- Element 5: Flickering Core Fire --- */
+.habitat-element.fire {
+  bottom: 12%;
+  left: 48%;
+  font-size: 2.8rem;
+  opacity: 0.8;
+  animation: flickerFire 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes flickerFire {
+  0% { transform: scale(0.92) skewX(-2deg); filter: brightness(0.9) drop-shadow(0 0 10px #ff5500); }
+  100% { transform: scale(1.08) skewX(3deg); filter: brightness(1.2) drop-shadow(0 0 22px #ffaa00); }
+}
+
+/* --- Element 6: Storm Clouds & Lightning Flash --- */
+.habitat-element.cloud-lightning {
+  top: 8%;
+  right: 22%;
+  font-size: 2.6rem;
+  opacity: 0.7;
+  animation: floatCloud 10s ease-in-out infinite alternate, lightningStrike 6s infinite;
+}
+
+@keyframes floatCloud {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(30px); }
+}
+
+@keyframes lightningStrike {
+  0%, 91%, 93%, 97%, 100% { filter: brightness(1); }
+  92%, 95% { filter: brightness(2.8) drop-shadow(0 0 25px #64ffda); }
+}
+
+/* --- Element 7: Wind Currents --- */
+.habitat-element.wind {
+  top: 35%;
+  font-size: 2.2rem;
+  opacity: 0;
+  animation: gustWind 14s linear infinite;
+}
+
+@keyframes gustWind {
+  0% { right: -10%; opacity: 0; transform: translateY(0) scale(0.8); }
+  10% { opacity: 0.25; }
+  85% { opacity: 0.25; }
+  100% { right: 110%; opacity: 0; transform: translateY(-50px) scale(1.2); }
+}
+
+/* --- Static Environmental Scenery Anchors --- */
+.habitat-element.human { bottom: 13%; left: 36%; font-size: 2.2rem; opacity: 0.65; animation: idleHuman 3s ease-in-out infinite alternate; }
+.habitat-element.tree-1 { bottom: 10%; left: 6%; font-size: 3.8rem; opacity: 0.5; }
+.habitat-element.tree-2 { bottom: 11%; right: 5%; font-size: 3.8rem; opacity: 0.5; }
+.habitat-element.rock { bottom: 8%; left: 15%; font-size: 2.4rem; opacity: 0.55; }
+.habitat-element.water { bottom: 2%; left: 0; right: 0; text-align: center; font-size: 1.6rem; opacity: 0.2; animation: tideMove 4s ease-in-out infinite alternate; }
+
+@keyframes idleHuman { 0% { transform: translateY(0); } 100% { transform: translateY(-5px); } }
+@keyframes tideMove { 0% { transform: scale(0.98); } 100% { transform: scale(1.02); } }

@@ -20,11 +20,11 @@ const MainMenu = ({ setCurrentView, setIsSettingsOpen, animSpeed }) => {
             Settings
           </button>
           <button className="btn btn-play" onClick={() => setCurrentView('ROUND_MENU')}>
-            PLAY MULTIPLAYER
+            PLAY Multiplayer
           </button>
           {/* TOMBOL TUTORIAL BARU */}
           <button className="btn btn-practice" onClick={() => setCurrentView('TUTORIAL')}>
-            PRACTICE (TUTORIAL)
+            Practice Bot
           </button>
         </div>
       </>
