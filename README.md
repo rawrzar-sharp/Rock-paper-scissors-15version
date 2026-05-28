@@ -25,7 +25,7 @@ const API_BASE = process.env.REACT_APP_BACKEND_URL || '[http://34.67.224.115:800
 
 
 Within the GCP:
-gcloud compute ssh rps15-game --zone=us-central1-a
+gcloud compute ssh rps-game --zone=us-central1-a
 
 cd /var/www/html/
 

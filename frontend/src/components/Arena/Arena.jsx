@@ -2,6 +2,69 @@ import React, { useState, useEffect } from 'react';
 import ArenaCircle from './ArenaCircle';
 import './Arena.css';
 
+  const GESTURE_AUDIO = {
+    Wolf: {
+      hit: new Audio('/audio/wolf_howl.mp3'),
+      miss: new Audio('/audio/wolf_scared.mp3'),
+    },
+    Dragon: {
+      hit: new Audio('/audio/dragon_growl.mp3'),
+      miss: new Audio('/audio/dragon_whimper.mp3'),
+    },
+    Rock: {
+      hit: new Audio('/audio/Rockhit.mp3'),
+      miss: new Audio('/audio/Rockfall.mp3'),
+    },
+    Fire: {
+      hit: new Audio('/audio/Firecrackle.mp3'),
+      miss: new Audio('/audio/FireSizzle.mp3'),
+    },
+    Scissors: {
+      hit: new Audio('/audio/Snip.mp3'),
+      miss: new Audio('/audio/Metalcrack.mp3'),
+    },
+    Snake: {
+      hit: new Audio('/audio/Rattle.mp3'),
+      miss: new Audio('/audio/Hiss.mp3'),
+    },
+    Human: {
+      hit: new Audio('/audio/Hey.mp3'),
+      miss: new Audio('/audio/AAA.mp3'),
+    },
+    Tree: {
+      hit: new Audio('/audio/TreeGrowl.mp3'),
+      miss: new Audio('/audio/Timber.mp3'),
+    },
+    Paper: {
+      hit: new Audio('/audio/Papercut.mp3'),
+      miss: new Audio('/audio/Paperrip.mp3'),
+    },
+    Sponge: {
+      hit: new Audio('/audio/Carwipe.mp3'),
+      miss: new Audio('/audio/Carwipe.mp3'),
+    },
+    Air: {
+      hit: new Audio('/audio/Tornado.mp3'),
+      miss: new Audio('/audio/Gush.mp3'),
+    },
+    Water: {
+      hit: new Audio('/audio/Tsunami.mp3'),
+      miss: new Audio('/audio/droplet.mp3'),
+    },
+    Devil: {
+      hit: new Audio('/audio/Laugh.mp3'),
+      miss: new Audio('/audio/Scream.mp3'),
+    },
+    Lightning: {
+      hit: new Audio('/audio/Thunder.mp3'),
+      miss: new Audio('/audio/Electric.mp3'),
+    },
+    Gun: {
+      hit: new Audio('/audio/Gunshot.mp3'),
+      miss: new Audio('/audio/Brokengun.mp3'),
+    }
+  };
+
 const Arena = ({
   socket,
   setIsSettingsOpen,
@@ -11,7 +74,9 @@ const Arena = ({
   playerMarker,
   powerupsEnabled,
   onExitToMenu,
-  animSpeed
+  animSpeed,
+  volume,
+  sfxEnabled
 }) => {
   const [gameState, setGameState] = useState(initialGameState);
   const [actionLogs, setActionLogs] = useState([]);
@@ -28,29 +93,78 @@ const Arena = ({
   // Track opponent token identity cleanly
   const opponentMarker = playerMarker === 'X' ? 'O' : 'X';
 
+  useEffect(() => {
+      // Map string values to Audio API volume scales (0.0 to 1.0)
+      const volumeMap = {
+        Low: 0.2,
+        Neutral: 0.5,
+        High: 1.0
+      };
+      
+      const targetVolume = volumeMap[volume] ?? 0.5;
+
+      // Apply to every asset inside your registry map
+      Object.values(GESTURE_AUDIO).forEach(gestureGroup => {
+        if (gestureGroup.hit) gestureGroup.hit.volume = targetVolume;
+        if (gestureGroup.miss) gestureGroup.miss.volume = targetVolume;
+      });
+    }, [volume]);
+
   // State synchronization engine
+// State synchronization engine
   useEffect(() => {
     if (!socket) return;
+
     const handleSync = (data) => {
       setGameState(data.state);
       
       if (data.log) {
         setActionLogs((prev) => [{ id: Date.now() + Math.random(), text: data.log }, ...prev].slice(0, 10));
       }
+
+      // ✅ 1. CONSOLIDATED ACTION CLASH LOGIC
       if (data.clash) {
         setShakeScreen(true);
         setTimeout(() => setShakeScreen(false), 500);
-        
-        if (data.clash.outcome === 'DRAW' || data.clash.outcome === 'tie') {
-          setClashAnnouncement(`DEADLOCK: ${data.clash.move_x.toUpperCase()}`);
-        } else {
-          setClashAnnouncement(`PLAYER ${data.clash.outcome.replace('_win', '')} STRIKES!`);
+        setStagedGesture(null);
+        setIsPowerupArmed(false);
+
+        const headline = (data.clash.outcome === 'DRAW' || data.clash.outcome === 'tie')
+            ? `DEADLOCK: ${data.clash.move_x.toUpperCase()}`
+            : `PLAYER ${data.clash.outcome.replace('_win', '')} STRIKES!`;
+            
+        setClashAnnouncement(`${headline} (${data.clash.description})`);
+      }
+      
+      // ✅ 2. DYNAMIC SFX ENGINE
+      if (data.clash && sfxEnabled) {
+        const myMove = playerMarker === 'X' ? data.clash.move_x : data.clash.move_o;
+        const outcome = data.clash.outcome;
+
+        if (myMove && GESTURE_AUDIO[myMove]) {
+          const masterVolLevel = volume === 'High' ? 1.0 : volume === 'Neutral' ? 0.6 : 0.2;
+
+          if (outcome === playerMarker) {
+            const winSound = GESTURE_AUDIO[myMove].hit;
+            winSound.volume = masterVolLevel;
+            winSound.currentTime = 0;
+            winSound.play().catch(e => console.log("Audio play blocked:", e));
+          } else if (outcome !== 'DRAW') {
+            const loseSound = GESTURE_AUDIO[myMove].miss;
+            loseSound.volume = masterVolLevel;
+            loseSound.currentTime = 0;
+            loseSound.play().catch(e => console.log("Audio play blocked:", e));
+          }
         }
       }
-    };
+    }; // ✅ This cleanly closes handleSync
+
     socket.on('sync_state', handleSync);
     return () => socket.off('sync_state', handleSync);
-  }, [socket]);
+  }, [socket, volume, sfxEnabled, playerMarker]); 
+
+
+
 
   // Turn reset / round advancement listener
   useEffect(() => {

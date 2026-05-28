@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import MainMenu from './components/MainMenu/MainMenu';
-import SettingsModal from './components/SettingsModal/SettingsModal';
+import ArenaSettings from './components/ArenaSettings/ArenaSettings';
 import RulesModal from './components/RulesModal/RulesModal';
 import Arena from './components/Arena/Arena';
 import Lobby from './components/Lobby/Lobby';
@@ -28,6 +28,7 @@ const App = () => {
 
   const [difficulty, setDifficulty] = useState('Easy');
   const [animSpeed, setAnimSpeed] = useState('Neutral');
+  const [sfxEnabled, setSfxEnabled] = useState(true);
   const [volume, setVolume] = useState('Neutral');
   const [roundCount, setRoundCount] = useState(5);
   const [powerupsEnabled, setPowerupsEnabled] = useState(true);
@@ -209,8 +210,8 @@ const handleStartGame = () => {
         />
       )}
 
-        {currentView === 'ROUND_MENU' && (
-          <Lobby 
+        {(currentView === 'ROUND_MENU' || currentView === 'LOBBY_WAITING') && (
+          <Lobby
             onConnect={handleConnect}
             isConnected={!!socket}
             isHost={isHost}
@@ -221,30 +222,34 @@ const handleStartGame = () => {
           />
         )}
 
-      {currentView === 'ARENA' && (
-        <Arena 
-          socket={socket}
-          setIsSettingsOpen={setIsSettingsOpen}
-          setIsRulesOpen={setIsRulesOpen}
-          initialGameState={lobbyState}
-          sessionId={dynamicSessionId}
-          playerMarker={assignedMarker}
-          roundCount={roundCount}
-          powerupsEnabled={powerupsEnabled}
-          activePowerup={activePowerup}
-          onExitToMenu={handleDisconnectCleanup}
-          animSpeed={animSpeed}
-        />
-      )}
+  {currentView === 'ARENA' && (
+    <>
+      <Arena 
+        socket={socket}
+        setIsSettingsOpen={setIsSettingsOpen}
+        setIsRulesOpen={setIsRulesOpen}
+        initialGameState={lobbyState}
+        sessionId={dynamicSessionId}
+        playerMarker={assignedMarker}
+        roundCount={roundCount}
+        powerupsEnabled={powerupsEnabled}
+        activePowerup={activePowerup}
+        onExitToMenu={handleDisconnectCleanup}
+        animSpeed={animSpeed}
+        sfxEnabled={sfxEnabled}
+        volume={volume}
+      />
 
       {isSettingsOpen && (
-        <SettingsModal
-          difficulty={difficulty} setDifficulty={setDifficulty}
+        <ArenaSettings
           animSpeed={animSpeed} setAnimSpeed={setAnimSpeed}
           volume={volume} setVolume={setVolume}
+          sfxEnabled={sfxEnabled} setSfxEnabled={setSfxEnabled}
           onClose={() => setIsSettingsOpen(false)}
         />
       )}
+    </>
+  )}
 
       {isRulesOpen && <RulesModal onClose={() => setIsRulesOpen(false)} />}
     </div>

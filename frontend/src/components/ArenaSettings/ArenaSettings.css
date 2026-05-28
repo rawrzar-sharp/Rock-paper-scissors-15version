@@ -1,0 +1,135 @@
+/* Custom Cockpit Settings Overlay */
+.arena-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(4, 5, 9, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.arena-modal-overlay.arena-blur {
+  backdrop-filter: blur(8px);
+}
+
+.arena-modal-content {
+  background: #0e1424;
+  border: 2px solid #2b6cb0;
+  color: #f7fafc;
+  padding: 30px;
+  border-radius: 8px;
+  width: 420px;
+  font-family: 'Courier New', Courier, monospace;
+  box-shadow: 0 0 30px rgba(43, 108, 176, 0.25);
+}
+
+.arena-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.arena-modal-header h3 {
+  margin: 0;
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  color: #cbd5e0;
+}
+
+.terminal-ping {
+  width: 10px;
+  height: 10px;
+  background-color: #00f0ff;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00f0ff;
+}
+
+.arena-divider {
+  border: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 20px 0;
+}
+
+.arena-setting-group {
+  margin-bottom: 24px;
+}
+
+.arena-setting-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #a0aec0;
+}
+
+.arena-toggle-group {
+  display: flex;
+  gap: 8px;
+}
+
+/* Tactical Sci-Fi Buttons */
+.arena-btn {
+  flex: 1;
+  padding: 10px;
+  background: #1a202c;
+  border: 1px solid #4a5568;
+  color: #a0aec0;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.arena-btn:hover {
+  background: #2d3748;
+  color: white;
+}
+
+/* State Glow Markers */
+.arena-btn.active-cyan {
+  background: rgba(0, 240, 255, 0.15);
+  border-color: #00f0ff;
+  color: #00f0ff;
+  box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+}
+
+.arena-btn.active-red {
+  background: rgba(229, 62, 62, 0.15);
+  border-color: #e53e3e;
+  color: #e53e3e;
+  box-shadow: 0 0 10px rgba(229, 62, 62, 0.2);
+}
+
+.arena-btn.active-blue {
+  background: rgba(66, 153, 225, 0.15);
+  border-color: #4299e1;
+  color: #4299e1;
+  box-shadow: 0 0 10px rgba(66, 153, 225, 0.2);
+}
+
+/* Bottom Commit Trigger */
+.arena-btn-save {
+  width: 100%;
+  padding: 14px;
+  background: #2b6cb0;
+  color: white;
+  border: none;
+  font-family: inherit;
+  font-weight: bold;
+  letter-spacing: 2px;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 4px 14px rgba(43, 108, 176, 0.4);
+  transition: background 0.2s ease;
+}
+
+.arena-btn-save:hover {
+  background: #3182ce;
+}
