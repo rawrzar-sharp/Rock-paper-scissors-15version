@@ -9,8 +9,9 @@ import TutorialArena from './components/Arena/TutorialArena';
 
 import './styles.css';
 
+const protocol = window.location.protocol; // This will be 'http:' or 'https:'
 const serverIp = window.location.hostname;
-const API_BASE = `http://${serverIp}:8000`;
+const API_BASE = `${protocol}//${serverIp}:8000`;
 
 const App = () => {
   const [currentView, setCurrentView] = useState('MAIN_MENU');
@@ -34,35 +35,59 @@ const App = () => {
 
   const [isHost, setIsHost] = useState(false);
 
-const handleConnect = (code, role) => {
-  // Connect to backend and assign role explicitly based on which button they clicked
+  const handleConnect = (roomCode, playerMarker) => {
   const newSocket = io(API_BASE, {
-    query: { room: code, player: role }
+    path: "/socket.io/",
+    query: { room: roomCode, player: playerMarker } // This matches server.py expectations
   });
 
-  setSocket(newSocket);
-  setDynamicSessionId(code);
-  setRoomCodeInput(code);
-  setAssignedMarker(role);
-  setIsHost(role === 'X'); // If they clicked "Create", they are X (Host)
-
-  newSocket.on('connect', () => {
-    console.log(`Connected as ${role} to room ${code}`);
+  newSocket.on("connect", () => {
+    console.log("Connected! Socket ID:", newSocket.id);
+    setSocket(newSocket);
   });
 
-  // Listen for the other player joining
-  newSocket.on('player_joined', (data) => {
-    if (data.marker === 'O') {
-      setChallengerJoined(true);
-    }
-  });
-
-  // Listen for the host clicking start
-  newSocket.on('match_started', (data) => {
+  // CRITICAL: Listen for the initial game state
+  newSocket.on("sync_state", (data) => {
+    console.log("Initial state received:", data);
     setLobbyState(data.state);
-    setCurrentView('ARENA');
+    setCurrentView('ARENA'); // Move to arena ONLY after receiving data
   });
 };
+
+    newSocket.on("connect", () => {
+      setSocket(newSocket);
+      newSocket.emit("join_room", { room: roomCode, player: playerMarker });
+    });
+
+// const handleConnect = (code, role) => {
+//   // Connect to backend and assign role explicitly based on which button they clicked
+//   const newSocket = io(API_BASE, {
+//     query: { room: code, player: role }
+//   });
+
+//   setSocket(newSocket);
+//   setDynamicSessionId(code);
+//   setRoomCodeInput(code);
+//   setAssignedMarker(role);
+//   setIsHost(role === 'X'); // If they clicked "Create", they are X (Host)
+
+//   newSocket.on('connect', () => {
+//     console.log(`Connected as ${role} to room ${code}`);
+//   });
+
+//   // Listen for the other player joining
+//   newSocket.on('player_joined', (data) => {
+//     if (data.marker === 'O') {
+//       setChallengerJoined(true);
+//     }
+//   });
+
+//   // Listen for the host clicking start
+//   newSocket.on('match_started', (data) => {
+//     setLobbyState(data.state);
+//     setCurrentView('ARENA');
+//   });
+// };
 
 const handleStartGame = () => {
   if (socket && socket.connected) {

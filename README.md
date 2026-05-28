@@ -41,4 +41,11 @@ sudo docker-compose up -d game_server
 
 sudo docker-compose up -d frontend
 
+How to build:
+cd /var/www/html
+sudo git fetch --all
+sudo git reset --hard origin/main
+sudo docker-compose build frontend
+sudo docker-compose up -d frontend
+
 Works!

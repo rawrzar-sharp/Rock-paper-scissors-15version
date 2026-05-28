@@ -105,9 +105,6 @@ resource "google_compute_instance" "game_vm" {
         sed -i 's/#//g' docker-compose.yml
     fi
 
-    # 4. Patch your 'localhost' fallback path inside App.js to your actual Cloud IP
-    find . -type f -name "App.js" -exec sed -i 's|http://localhost:8000|http://34.44.209.170:8000|g' {} +
-
     # 5. Bring down any hanging instances and start docker-compose fresh
     sudo docker-compose down --remove-orphans
     sudo docker-compose up -d --build
