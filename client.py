@@ -1,9 +1,13 @@
 import asyncio
 import socketio
 import json
+import os
 
 # Initialize the Socket.IO client
 sio = socketio.AsyncClient()
+
+SERVER_IP = os.environ.get("SERVER_IP", "34.67.224.115") 
+PORT = "8000"
 
 @sio.event
 async def connect():
@@ -24,7 +28,7 @@ async def run_client():
     
     # 1. Connect with Query Parameters (Required for your server's @sio.event connect handler)
     print(f"Connecting to Arena via Socket.IO...")
-        await sio.connect('http://35.225.155.246:8000',
+        await sio.connect(f'http://{SERVER_IP}:{PORT}',
         socketio_path='/socket.io',
         query={'room': session_id, 'player': player_marker}
     )

@@ -9,8 +9,8 @@ import TutorialArena from './components/Arena/TutorialArena';
 
 import './styles.css';
 
-//  AFTER
-const API_BASE = process.env.REACT_APP_BACKEND_URL || 'http://35.225.155.246:8000';
+const serverIp = window.location.hostname;
+const API_BASE = `http://${serverIp}:8000`;
 
 const App = () => {
   const [currentView, setCurrentView] = useState('MAIN_MENU');

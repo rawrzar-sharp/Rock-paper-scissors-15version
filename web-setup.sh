@@ -1,21 +1,16 @@
 #!/bin/bash
 
-# Update package list and install Nginx and Git
-sudo apt-get update -y
-sudo apt-get install nginx git -y
+# 1. Install necessary tools
+sudo apt update -y
+sudo apt install -y git docker.io docker-compose
 
-# Remove the default Nginx welcome page
-sudo rm -rf /var/www/html/*
+# 2. Prepare the directory
+sudo mkdir -p /var/www/html
+sudo chown -R $USER:$USER /var/www/html
 
-# Clone your specific Rock-Paper-Scissors repository
-git clone https://github.com/rawrzar-sharp/Rock-paper-scissors-15version.git
+# 3. Clone your code
+git clone https://github.com/rawrzar-sharp/Rock-paper-scissors-15version.git /var/www/html/
+cd /var/www/html/
 
-# Move the game files into the public web directory
-sudo cp -r Rock-paper-scissors-15version/* /var/www/html/
-
-# Clean up the cloned folder to save space
-rm -rf Rock-paper-scissors-15version
-
-# Ensure Nginx is enabled on boot and restart it to apply the changes
-sudo systemctl enable nginx
-sudo systemctl restart nginx
+# 4. Start the game infrastructure
+sudo docker-compose up -d --build

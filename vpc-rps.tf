@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "google" {
-  project = "rps15-497506"
+  project = "4787649586036097510"
   region  = "us-central1" 
 }
 

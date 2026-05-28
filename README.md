@@ -21,7 +21,7 @@ Open `frontend/src/App.js` and ensure the target engine string points directly t
 
 ```javascript
 // Ensure this matches your cloud environment's External IP
-const API_BASE = process.env.REACT_APP_BACKEND_URL || '[http://35.225.155.246:8000](http://35.225.155.246:8000)';
+const API_BASE = process.env.REACT_APP_BACKEND_URL || '[http://34.67.224.115:8000](http://34.67.224.115:8000)';
 
 
 Within the GCP:
