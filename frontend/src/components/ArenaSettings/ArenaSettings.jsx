@@ -1,5 +1,5 @@
 import React from 'react';
-import './arenaSettings.css';
+import './ArenaSettings.css';
 
 const ArenaSettings = ({
   animSpeed,
